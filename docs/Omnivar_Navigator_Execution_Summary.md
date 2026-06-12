@@ -17,8 +17,8 @@ work proceeds; mirrored to the repo (`docs/`) and pushed to GitHub.
 |---|---|---|---|
 | **Setup** (infra, repo, data, verification) | — | ✅ | Repo + VM + data parity + source verification complete |
 | **P0** Foundations & rule engine | 1–3 | ✅ | Schemas/adapter/audit/posterior/point-engine ✅; **Gate G1 passed** (94.9%); VCEP YAML loader deferred to P1 (AF thresholds) |
-| **P1** Evidence orchestration (adapters) | 2–5 | ⏳ | Next: gnomAD/ClinVar/HPO adapters against kept data + VCEP loader |
-| **P2** Decision & orchestration core | 4–8 | 🟡 | **gap / action_map / VOI / recommend ✅ (tested)**; risk-gate, equity filter, Pareto, case-policy remain |
+| **P1** Evidence orchestration (adapters) | 2–5 | 🟡 | **ClinVar PS1/PM5 ✅ (real index, 70,723 P/LP missense)**; gnomAD/HPO adapters + VCEP loader next |
+| **P2** Decision & orchestration core | 4–8 | ✅ | gap / action_map / VOI / recommend + **risk-gate, Pareto frontier, conflict→orthogonal, recessive/X-linked, audit** — fully matches design doc; case-policy (P4) + equity filter (P3) pending |
 | **P3** Equity module | 6–9 | ⏳ | ancestry inference + reliability + routing |
 | **P4** Whole-odyssey layer | 8–11 | ⏳ | case policy, modality escalation |
 | **P5** UI, audit, learning loop | 9–13 | 🟡 | audit ledger ✅; UI/learning queued |
@@ -139,6 +139,35 @@ The scientific centerpiece. Pure-Python, fully unit-tested (no external data nee
   → **Likely Pathogenic**. Tested.
 - **Remaining for Phase 2:** risk gate (τ), equity filter hook (Phase 3), explicit Pareto
   frontier, `case_policy.py` whole-odyssey wrapper. **Commit** `5a74536`.
+
+---
+
+### Phase 2 completeness pass (vs design doc) — ✅
+- Added per **OmniVar_Navigator_Phase2_Decision_Engine_Design.md**: risk gate τ (§3.6),
+  outcome variance, cost–EIG **Pareto frontier** (§3.5), **conflict → orthogonal
+  disambiguating assay** (§6), **recessive-diplotype / X-linked-hemizygote** case notes
+  (§3.1/§6), lookahead escalation on near-ties (§3.8), and audit-ledger integration.
+- **Modeling note:** under fixed ±4 points/action, EIG is near-flat across assays
+  (branch entropies near-symmetric) → decision-utility ΔU and cost are the meaningful
+  discriminators; EIG is reported for transparency (the Pareto axis). **Commit** `c0fc016`.
+
+---
+
+## Phase 1 — Evidence orchestration (adapters) — 🟡
+
+### Step 1.5 — ClinVar adapter (PS1 / PM5) — ✅
+- **Method:** `data/sources/build_clinvar_index.py` parsed the **kept** ClinVar
+  `variant_summary.txt.gz` (run on the VM) into a gene→residue→{alt_aa: significance}
+  index of P/LP missense. `adapters/clinvar.py` (`ClinVarAdapter`, EvidenceAdapter)
+  emits **PS1** (same AA change is P/LP) or **PM5** (different pathogenic missense at
+  the same residue).
+- **Outcome:** index built from **8,978,110 rows → 70,723 P/LP missense across 4,560
+  genes** (2.5 MB JSON, mirrored VM↔G:). Live demo fires PS1 correctly on real
+  bleeding-gene variants (F8 p.Arg2228Gln, F8 p.Arg612Cys, VWF p.Arg854Gln). 31 tests pass.
+- **Artifacts:** `adapters/clinvar.py`, `data/sources/build_clinvar_index.py`,
+  `data/processed/clinvar_ps1_pm5.json`. **Commit** `47cbbcd`.
+- **Next in P1:** `rules/vcep_loader.py` + base/F8 specs; `adapters/gnomad.py`
+  (PM2/BS1/BA1 via gnomAD GraphQL API); `adapters/phenotype.py` (PP4 via HPO).
 
 ---
 
