@@ -44,9 +44,10 @@ def fig_posterior_bridge(outdir: str) -> str:
     ys = [posterior(p) for p in pts]
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(pts, ys, "-o", color="#55A868")
-    for thr, lab in [(10, "P"), (6, "LP"), (-6, "LB"), (-7, "B")]:
+    for thr in (10, 6, -6, -7):
         ax.axvline(thr, ls="--", color="grey", lw=0.8)
-    ax.set_xlabel("combined ACMG points"); ax.set_ylabel("posterior P(pathogenic)")
+    ax.set_xlabel("combined ACMG points")
+    ax.set_ylabel("posterior P(pathogenic)")
     ax.set_title("Tavtigian points -> posterior bridge")
     path = os.path.join(outdir, "fig_posterior_bridge.png")
     fig.tight_layout()
