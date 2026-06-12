@@ -1,0 +1,20 @@
+# Glanzmann thrombasthenia — ClinGen Platelet Disorder VCEP (ITGA2B/ITGB3).
+# VERIFIED: Ross et al., Blood Advances 2021;5(2):414-431 (PMID 33496739); CSpec GN079.
+# 70 pilot variants; applying these criteria cut VUS "from 29% to 20%". 16 gene-specified
+# rules (7 with adjustable strength). AF thresholds + per-code strengths below are
+# documented placeholders pending extraction of the exact GN079 tables.
+spec_id: PD-VCEP-ITGA2B_ITGB3
+genes: [ITGA2B, ITGB3]
+disease: Glanzmann thrombasthenia
+inheritance: AR
+mechanism: integrin_expression
+source: "Ross et al., Blood Adv 2021;5(2):414-431 (PMID 33496739); ClinGen PD-VCEP; CSpec GN079"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.01
+  bs1: 0.001
+  pm2: 0.0001
+code_strengths:
+  PM2: PP        # frequency at Supporting in the recessive specification (placeholder)
+notes: "GT is AR; the highest-stakes confuser LAD-III (FERMT3) is NOT VCEP-covered (cluster asymmetry)."

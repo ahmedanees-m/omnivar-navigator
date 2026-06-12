@@ -1,0 +1,17 @@
+# Hemophilia B — ClinGen Coagulation Factor Deficiency VCEP (F9).
+# X-linked; CFD-VCEP; F9 classifications in ClinVar at 3-star FDA-recognized.
+# AF thresholds placeholder pending the published F9 spec table.
+spec_id: CFD-VCEP-F9
+genes: [F9]
+disease: Hemophilia B
+inheritance: XLR
+mechanism: coag_factor
+source: "ClinGen CFD-VCEP F9; 3-star FDA-recognized"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.0015
+  bs1: 0.0001
+  pm2: 0.00001
+code_strengths: {}
+notes: "Hemizygote handling as for F8. AF thresholds placeholder."

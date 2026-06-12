@@ -1,0 +1,18 @@
+# Familial platelet disorder with myeloid malignancy — ClinGen Myeloid Malignancy VCEP.
+# VERIFIED: Luo et al., Blood Advances 2019;3(20):2962-2979 (DOI 10.1182/bloodadvances.2019000644,
+# PMID 31648317); germline RUNX1; gene-specified 28 ACMG codes; reduced CONF/VUS by 33%.
+# Includes MAF thresholds, functional-domain hotspots, semi-quantitative case counting.
+spec_id: MM-VCEP-RUNX1
+genes: [RUNX1]
+disease: RUNX1 familial platelet disorder with myeloid malignancy
+inheritance: AD
+mechanism: transcription_factor
+source: "Luo et al., Blood Adv 2019;3(20):2962-2979 (DOI 10.1182/bloodadvances.2019000644; PMID 31648317)"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.001
+  bs1: 0.0001
+  pm2: 0.00001
+code_strengths: {}
+notes: "Germline cancer-risk implication; surveillance + donor selection. AF thresholds placeholder."

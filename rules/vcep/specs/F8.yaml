@@ -1,0 +1,18 @@
+# Hemophilia A — ClinGen Coagulation Factor Deficiency VCEP (F8 spec GN071, v2.0.0).
+# VERIFIED (OmniVar): cspec.genome.network/cspec/ui/svi/svi/GN071; X-linked; PVS1-RNA,
+# PP3/BP4/BP7 splice updates, ratio-based hemizygote PS4. 3-star FDA-recognized in ClinVar
+# (the gold-standard validation set). AF thresholds are placeholders pending the GN071 table.
+spec_id: CFD-VCEP-F8
+genes: [F8]
+disease: Hemophilia A
+inheritance: XLR
+mechanism: coag_factor
+source: "ClinGen CFD-VCEP F8 v2.0.0 (GN071); 3-star FDA-recognized"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.0015
+  bs1: 0.0001
+  pm2: 0.00001
+code_strengths: {}
+notes: "Hemizygote PS4 rule (males need one allele). AF thresholds placeholder pending GN071."
