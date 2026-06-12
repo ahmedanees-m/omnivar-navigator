@@ -36,16 +36,20 @@ _PREFIX_DEFAULT = {
     "BP": "Supporting",
 }
 
-# normalize free-text strength variants seen in the wild
+# normalize free-text strength variants seen in the wild (eRepo writes e.g.
+# "PM3_Very Strong" with a space, "Stand Alone", etc.). Keys are space/underscore-
+# stripped, lowercased.
 _LABEL_ALIASES = {
     "verystrong": "VeryStrong",
-    "very_strong": "VeryStrong",
     "standalone": "Standalone",
-    "stand_alone": "Standalone",
     "strong": "Strong",
     "moderate": "Moderate",
     "supporting": "Supporting",
 }
+
+
+def _norm_label(s: str) -> str:
+    return s.replace(" ", "").replace("_", "").lower()
 
 _PREFIX_RE = re.compile(r"^(B?[A-Z]+?)(\d+)?$")   # PVS1 -> (PVS,1); PM2 -> (PM,2); BA1 -> (BA,1)
 
@@ -70,7 +74,7 @@ def code_points(code: str) -> tuple[float, bool]:
     base = parts[0].strip()
     label = None
     if len(parts) == 2:
-        label = _LABEL_ALIASES.get(parts[1].strip().lower(), parts[1].strip())
+        label = _LABEL_ALIASES.get(_norm_label(parts[1]), parts[1].strip())
     prefix = _prefix(base).upper()
     if prefix not in _PREFIX_DEFAULT:
         return 0.0, False

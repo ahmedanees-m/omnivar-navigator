@@ -9,6 +9,7 @@ def test_defaults_and_modifiers():
     assert code_points("PM2") == (2.0, False)
     assert code_points("PP4") == (1.0, False)
     assert code_points("PVS1_Strong") == (4.0, False)
+    assert code_points("PM3_Very Strong") == (8.0, False)   # eRepo uses a space
     assert code_points("PP4_Moderate") == (2.0, False)
     assert code_points("PM2_Supporting") == (1.0, False)
     assert code_points("BS1") == (-4.0, False)
