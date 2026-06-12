@@ -38,22 +38,31 @@ _CODE_K = {"PVS": 8.0, "PS": 4.0, "PM": 2.0, "PP": 1.0,
            "BVS": 8.0, "BS": 4.0, "BM": 2.0, "BP": 1.0}
 
 
-def action_k(a: Action) -> float:
-    """Points an action's *strongest* yielded code would contribute (PS3->4, PP1->1)."""
-    best = 1.0
+def action_k(a: Action) -> tuple[float, float]:
+    """(k_pos, k_neg) an action yields, split by direction.
+
+    A positive result adds the strongest *pathogenic* code's points; a negative result
+    subtracts the strongest *benign* code's points. These can differ — e.g. segregation
+    yields PP1 (+1) on co-segregation but BS4 (-4) on non-segregation. Taking a single
+    max over both would overstate the weaker direction.
+    """
+    pos, neg = [], []
     for c in a.yields_codes:
         prefix = c[:3] if c[:3] in _CODE_K else c[:2]
-        best = max(best, _CODE_K.get(prefix, 1.0))
-    return best
+        k = _CODE_K.get(prefix, 1.0)
+        (pos if prefix.startswith("P") else neg).append(k)
+    k_pos = max(pos) if pos else (max(neg) if neg else 1.0)
+    k_neg = max(neg) if neg else (max(pos) if pos else 1.0)
+    return k_pos, k_neg
 
 
 def score_action(points: float, a: Action, prior_p: float = 0.10,
                  k_pos: float | None = None, k_neg: float | None = None) -> dict:
     """Score one action at the current points. k defaults to the action's yielded strength."""
-    if k_pos is None:
-        k_pos = action_k(a)
-    if k_neg is None:
-        k_neg = action_k(a)
+    if k_pos is None or k_neg is None:
+        ak_pos, ak_neg = action_k(a)
+        k_pos = ak_pos if k_pos is None else k_pos
+        k_neg = ak_neg if k_neg is None else k_neg
     p = posterior(points, prior_p)
     q = a.sensitivity * p + (1 - a.specificity) * (1 - p)        # P(positive result)
     p_pos = posterior(points + k_pos, prior_p)

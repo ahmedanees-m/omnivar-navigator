@@ -17,7 +17,8 @@ def test_epilepsy_pack_routes_to_patch_clamp():
                                 domain="epilepsy")
     assert rec.ranked
     assert any("patch_clamp" in r["action"] for r in rec.ranked)     # electrophysiology assay
-    assert rec.ranked[0]["modality"] == "functional"
+    # top action should be high-yield (PS3-class functional or RNA), not weak segregation
+    assert rec.ranked[0]["modality"] in {"functional", "rna"}
 
 
 def test_cancer_pack_routes_to_mave():
