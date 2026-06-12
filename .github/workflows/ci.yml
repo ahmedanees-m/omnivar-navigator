@@ -19,8 +19,16 @@ jobs:
           python -m pip install --upgrade pip
           # pyyaml is required at import time (engine/action_map, rules/vcep_loader);
           # numpy/scipy for stats. Heavy bio/LLM/service deps stay out of CI.
-          pip install numpy scipy pyyaml pytest ruff black
-      - name: Lint
+          pip install numpy scipy pyyaml pytest pytest-cov ruff black
+      - name: Lint (ruff)
         run: ruff check .
-      - name: Test
-        run: pytest -q
+      - name: Format check (black)
+        run: black --check . || true
+      - name: Test + coverage
+        run: pytest -q --cov=. --cov-report=xml --cov-report=term-missing
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
