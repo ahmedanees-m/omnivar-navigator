@@ -1,0 +1,62 @@
+# Cluster 5 — Thrombocytopenia + leukaemia risk (RUNX1, ETV6, ANKRD26).
+# Verified: RUNX1 germline = familial platelet disorder + myeloid malignancy (MM-VCEP,
+# Luo 2019). Management = surveillance + donor selection (avoid an affected related donor).
+id: thr_leukemia
+name: Thrombocytopenia with leukaemia predisposition
+discriminating_features: [family_history_malignancy, lifelong_thrombocytopenia, dense_granule_defect]
+diseases:
+  - id: runx1
+    name: RUNX1 familial platelet disorder with myeloid malignancy
+    genes: [RUNX1]
+    inheritance: AD
+    mechanism: transcription_factor
+    prior: 0.4
+    p_path_given_disease: 0.85
+    treatment: surveillance_donor_selection
+    contraindications: [affected_related_donor_transplant]
+    vcep_spec: MM-VCEP-RUNX1
+    feature_lr:
+      lifelong_thrombocytopenia: [0.9, 60, "31648317"]
+      family_history_malignancy: [0.6, 60, "31648317"]
+      dense_granule_defect: [0.5, 60, "31648317"]
+  - id: etv6
+    name: ETV6 thrombocytopenia with malignancy predisposition
+    genes: [ETV6]
+    inheritance: AD
+    mechanism: transcription_factor
+    prior: 0.3
+    p_path_given_disease: 0.85
+    treatment: surveillance_donor_selection
+    contraindications: [affected_related_donor_transplant]
+    vcep_spec: null
+    feature_lr:
+      lifelong_thrombocytopenia: [0.85, 30, "25581430"]
+      family_history_malignancy: [0.55, 30, "25581430"]
+  - id: ankrd26
+    name: ANKRD26-related thrombocytopenia
+    genes: [ANKRD26]
+    inheritance: AD
+    mechanism: promoter
+    prior: 0.3
+    p_path_given_disease: 0.85
+    treatment: surveillance
+    contraindications: []
+    vcep_spec: null
+    feature_lr:
+      lifelong_thrombocytopenia: [0.9, 30, "23329222"]
+      family_history_malignancy: [0.3, 30, "23329222"]
+next_observations:
+  - id: family_history_pedigree
+    name: Three-generation pedigree (thrombocytopenia + haematological malignancy)
+    kind: segregation
+    informs: [D]
+    outcome_lr: {malignancy_in_family: {runx1: 5.0, etv6: 4.0}}
+    changes_management: true
+    accessibility: high
+  - id: germline_panel
+    name: Germline RUNX1/ETV6/ANKRD26 sequencing (confirmed germline, not somatic)
+    kind: lab
+    informs: [D, V]
+    outcome_lr: {runx1_germline: {runx1: 20.0}, etv6_germline: {etv6: 20.0}}
+    changes_management: true
+    accessibility: moderate

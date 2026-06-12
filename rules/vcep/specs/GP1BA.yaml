@@ -1,0 +1,18 @@
+# Bernard-Soulier syndrome — ClinGen Platelet Disorder VCEP (GP1BA-BSS).
+# UPDATE D1 (verified 2026-06-13): GP1BA-BSS specification is now PUBLISHED (v1.1.0);
+# GP9/GP1BB still in progress. NOTE: this spec is for BSS (loss-of-function, AR) — the
+# PT-VWD phenotype of GP1BA (gain-of-function, AD) is a separate, uncovered association.
+spec_id: PD-VCEP-GP1BA
+genes: [GP1BA]
+disease: Bernard-Soulier syndrome
+inheritance: AR
+mechanism: gpib_complex
+source: "ClinGen Platelet Disorder VCEP, GP1BA-BSS v1.1.0 (published); GP9/GP1BB in progress"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.005
+  bs1: 0.0005
+  pm2: 0.0001
+code_strengths: {}
+notes: "BSS (LoF, AR). Distinct from PT-VWD (GP1BA GoF, AD), which is NOT VCEP-covered."

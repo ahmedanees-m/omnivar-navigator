@@ -1,0 +1,17 @@
+# von Willebrand disease — ClinGen VWD Variant Curation Expert Panel (VWF).
+# Covers 2A/2B/2M (verified, OmniVar). PT-VWD (GP1BA gain-of-function) is a DIFFERENT
+# gene/phenotype and is NOT covered (cluster coverage asymmetry).
+spec_id: VWD-VCEP-VWF
+genes: [VWF]
+disease: von Willebrand disease (2A/2B/2M)
+inheritance: AD
+mechanism: vwf
+source: "ClinGen VWD VCEP (CSpec); covers 2A/2B/2M"
+covered: true
+prior_p: 0.10
+af:
+  ba1: 0.01
+  bs1: 0.001
+  pm2: 0.0001
+code_strengths: {}
+notes: "Subtype-aware (2N via VWF:FVIII binding). AF thresholds placeholder pending VWD spec table."
