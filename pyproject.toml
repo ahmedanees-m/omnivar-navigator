@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omnivar-navigator"
+version = "0.0.1"
+description = "Rule-grounded, value-of-information decision-support engine for VUS resolution in rare disease."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Anees Ahmed Mahaboob Ali", email = "ahmedaneesm@gmail.com" }]
+keywords = ["clinical-genomics", "ACMG", "ClinGen", "value-of-information", "rare-disease"]
+dependencies = [
+  "numpy",
+  "scipy",
+  "pandas",
+  "scikit-learn",
+  "pydantic",
+  "pyyaml",
+  "requests",
+  "httpx",
+  "paramiko",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "black"]
+llm = ["openai"]
+service = ["fastapi", "uvicorn"]
+
+[tool.setuptools]
+packages = ["core", "rules", "adapters", "engine", "equity", "learn", "eval", "sim", "llm", "api", "deploy"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

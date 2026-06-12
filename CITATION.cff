@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use OmniVar Navigator, please cite it as below."
+title: "OmniVar Navigator: a rule-grounded, value-of-information decision-support engine for VUS resolution"
+authors:
+  - family-names: "Mahaboob Ali"
+    given-names: "Anees Ahmed"
+    alias: "ahmedanees-m"
+    email: "ahmedaneesm@gmail.com"
+repository-code: "https://github.com/ahmedanees-m/omnivar-navigator"
+license: MIT
+type: software
+keywords:
+  - clinical genomics
+  - variant classification
+  - ACMG
+  - ClinGen
+  - value of information
+  - rare disease
+  - bleeding disorders

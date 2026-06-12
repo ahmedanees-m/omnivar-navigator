@@ -1,0 +1,1 @@
+"""omnivar-navigator: adapters package."""
