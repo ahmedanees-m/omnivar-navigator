@@ -17,7 +17,7 @@ work proceeds; mirrored to the repo (`docs/`) and pushed to GitHub.
 |---|---|---|---|
 | **Setup** (infra, repo, data, verification) | — | ✅ | Repo + VM + data parity + source verification complete |
 | **P0** Foundations & rule engine | 1–3 | ✅ | Schemas/adapter/audit/posterior/point-engine ✅; **Gate G1 passed** (94.9%); VCEP YAML loader deferred to P1 (AF thresholds) |
-| **P1** Evidence orchestration (adapters) | 2–5 | 🟡 | **ClinVar PS1/PM5 ✅ (real index, 70,723 P/LP missense)**; gnomAD/HPO adapters + VCEP loader next |
+| **P1** Evidence orchestration (adapters) | 2–5 | 🟡 | **ClinVar PS1/PM5 ✅, gnomAD PM2/BS1/BA1 ✅ (live API), VCEP loader ✅; end-to-end pipeline runs on real data**; HPO/splice/insilico/autoPVS1/MAVE adapters next |
 | **P2** Decision & orchestration core | 4–8 | ✅ | gap / action_map / VOI / recommend + **risk-gate, Pareto frontier, conflict→orthogonal, recessive/X-linked, audit** — fully matches design doc; case-policy (P4) + equity filter (P3) pending |
 | **P3** Equity module | 6–9 | ⏳ | ancestry inference + reliability + routing |
 | **P4** Whole-odyssey layer | 8–11 | ⏳ | case policy, modality escalation |
@@ -166,8 +166,25 @@ The scientific centerpiece. Pure-Python, fully unit-tested (no external data nee
   bleeding-gene variants (F8 p.Arg2228Gln, F8 p.Arg612Cys, VWF p.Arg854Gln). 31 tests pass.
 - **Artifacts:** `adapters/clinvar.py`, `data/sources/build_clinvar_index.py`,
   `data/processed/clinvar_ps1_pm5.json`. **Commit** `47cbbcd`.
-- **Next in P1:** `rules/vcep_loader.py` + base/F8 specs; `adapters/gnomad.py`
-  (PM2/BS1/BA1 via gnomAD GraphQL API); `adapters/phenotype.py` (PP4 via HPO).
+### Step 0.2/0.4 — VCEP loader + specs — ✅
+- **Method:** `rules/vcep_loader.py` — `VCEPSpec` (AF thresholds, prior, mechanism,
+  inheritance, BA1 pre-filter) + `get_spec(gene)` (gene YAML or base fallback). Specs:
+  `rules/specs/base_acmg.yaml`, `F8.yaml` (GN071 v2.0.0 — verified rules encoded; AF
+  thresholds marked as placeholders pending spec-PDF extraction).
+- **Outcome:** swappable gene specs wired into the gnomAD adapter + point engine. Tested.
+
+### Step 1.1 — gnomAD adapter (PM2/BS1/BA1) — ✅
+- **Method:** `adapters/gnomad.py` — queries the **gnomAD v4 GraphQL API** for the
+  worst-case 95% filtering AF popmax (grpmax) across genome+exome → BA1/BS1/PM2 via
+  the spec thresholds (PM2 at Supporting per 2020 SVI). AF lookup injectable for tests.
+- **Outcome:** **live API verified** (`1-55051215-G-A` → grpmax FAF 0.000277). 39 tests pass.
+
+### End-to-end integration on real data — ✅
+- **Demo (run on VM):** real F8 missense p.Arg612Cys → **ClinVar PS1 (Strong, +4)** →
+  rule engine → **VUS** → decision core recommends **factor activity assay** (~$250, ~5d,
+  the mechanism-correct coag-factor assay) → expected PS3 → posterior 0.97 → **Likely
+  Pathogenic**, with the X-linked hemizygote PS4 note. The full vertical slice (adapters →
+  rule engine → VOI recommendation) works on real reference data. **Commit** `b30cea5`.
 
 ---
 
