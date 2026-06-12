@@ -36,16 +36,24 @@ GENE_TO_DISEASE = {
 
 # discriminating HPO terms -> cluster feature id (best-effort; gene routing carries the rest).
 HPO_TO_FEATURE = {
-    "HP:0001974": "leukocytosis",
+    "HP:0001974": "leukocytosis",          # Increased total leukocyte count
     "HP:0002719": "recurrent_infections",
+    "HP:0002718": "recurrent_infections",  # Recurrent bacterial infections
     "HP:0001873": "thrombocytopenia",
     "HP:0011875": "giant_platelets",
+    "HP:0032499": "giant_granules",        # Giant neutrophil granules (Chediak-Higashi)
     "HP:0001892": "glanzmann_type_bleeding",
     "HP:0011890": "glanzmann_type_bleeding",
     "HP:0000978": "glanzmann_type_bleeding",
+    "HP:0000421": "glanzmann_type_bleeding",   # Epistaxis
     "HP:0001025": "oculocutaneous_albinism",
     "HP:0007443": "oculocutaneous_albinism",
+    "HP:0002218": "oculocutaneous_albinism",   # Silver-gray hair (Chediak pigmentary)
 }
+
+# HPO terms indicating THROMBOSIS (not a DISCERN bleeding/platelet cluster) -> exclude the case.
+THROMBOSIS_HPO = {"HP:0002625", "HP:0002204", "HP:0030977", "HP:0004850", "HP:0005305",
+                  "HP:0030242", "HP:0040412", "HP:0034336"}
 
 
 def _walk(obj, key):
@@ -61,9 +69,13 @@ def _walk(obj, key):
 
 
 def parse_phenopacket(pp: dict) -> dict | None:
-    genes = {g for g in _walk(pp, "symbol") if isinstance(g, str)}
+    # the CAUSAL gene comes from the interpretation/geneContext, not any mentioned symbol
+    genes = {g for g in _walk(pp.get("interpretations", []), "symbol") if isinstance(g, str)}
     gene = next((g for g in genes if g in GENE_TO_DISEASE), None)
     if gene is None:
+        return None
+    hpo_ids = {(pf.get("type") or {}).get("id", "") for pf in pp.get("phenotypicFeatures", [])}
+    if hpo_ids & THROMBOSIS_HPO:        # thrombophilia case, not a DISCERN bleeding cluster
         return None
     feats = []
     for pf in pp.get("phenotypicFeatures", []):
