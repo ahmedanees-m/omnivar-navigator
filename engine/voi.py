@@ -80,3 +80,37 @@ def lookahead(points: float, actions: list[Action], depth: int = 2,
         if val > best_val:
             best_val, best_seq = val, [a, *seq_pos]
     return best_val, best_seq
+
+
+def outcome_variance(points: float, a: Action, prior_p: float = 0.10,
+                     k_pos: float = 4.0, k_neg: float = 4.0) -> float:
+    """Variance of the post-action actionability utility (for risk aversion, §3.6)."""
+    s = score_action(points, a, prior_p, k_pos, k_neg)
+    u_pos, u_neg = _U(s["p_pos"]), _U(s["p_neg"])
+    mean = s["q"] * u_pos + (1 - s["q"]) * u_neg
+    return s["q"] * (u_pos - mean) ** 2 + (1 - s["q"]) * (u_neg - mean) ** 2
+
+
+def risk_gate(ranked: list[tuple], tau: float = 0.0) -> list[tuple]:
+    """Drop actions whose expected ΔU is below τ (clinician-tunable, §3.6).
+
+    ``ranked`` items are (action, value_density, score_detail).
+    """
+    return [t for t in ranked if t[2].get("delta_utility", 0.0) >= tau]
+
+
+def pareto_frontier(points: float, actions: list[Action], prior_p: float = 0.10) -> list[dict]:
+    """Cost–EIG Pareto frontier (§3.5): cheapest action for each achievable EIG level.
+
+    Lets the clinician choose 'cheapest path to LP' vs 'fastest' rather than committing
+    to a single scalarization.
+    """
+    scored = [(a, a.cost_usd, score_action(points, a, prior_p=prior_p)["eig"]) for a in actions]
+    scored.sort(key=lambda t: (t[1], -t[2]))      # cost asc, eig desc
+    frontier, best_eig = [], -math.inf
+    for a, cost, eig in scored:
+        if eig > best_eig + 1e-12:
+            frontier.append({"action": a.name, "cost_usd": cost, "turnaround_days": a.turnaround_days,
+                             "eig_bits": round(eig, 4)})
+            best_eig = eig
+    return frontier

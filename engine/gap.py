@@ -84,3 +84,22 @@ def detect_conflict(ledger: PointsLedger) -> ConflictReport:
     path = [c.code for c in ledger.contributions if c.applied and c.strength.value > 0]
     ben = [c.code for c in ledger.contributions if c.applied and c.strength.value < 0]
     return ConflictReport(bool(path and ben), path, ben)
+
+
+# Modalities that provide *orthogonal* evidence — used to break VUS-by-conflict by
+# acquiring an independent readout rather than stacking more of the same (design §6).
+ORTHOGONAL_MODALITIES = {"functional", "rna", "segregation"}
+
+
+def case_note(inheritance: str) -> str:
+    """Inheritance-specific guidance (recessive diplotype / X-linked hemizygote, §3.1/§6)."""
+    inh = (inheritance or "").upper()
+    if inh.startswith("AR"):
+        return ("Recessive: disease causality is a property of the *genotype* — also pursue "
+                "the in-trans relationship (PM3 via phasing/parental testing) and functional "
+                "protein loss, which together support the diplotype even before the second "
+                "allele is fully resolved.")
+    if inh.startswith("XL"):
+        return ("X-linked: a hemizygous male needs one pathogenic allele; the CFD-VCEP "
+                "hemizygote PS4 rule applies (F8/F9).")
+    return ""
