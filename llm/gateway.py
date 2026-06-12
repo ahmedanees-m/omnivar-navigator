@@ -27,11 +27,16 @@ except Exception:  # pragma: no cover
 
 NVIDIA_BASE_URL = os.environ.get("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
 
+# Default cloud model: Nemotron Super 49B (Llama-3.3-based), served free from the
+# build.nvidia.com catalog. Overridable via NEMOTRON_MODEL. (The older
+# llama-3.1-nemotron-70b now 404s, hence pinning to the 3.3 Super 49B build.)
+NEMOTRON_MODEL = os.environ.get("NEMOTRON_MODEL", "nvidia/llama-3.3-nemotron-super-49b-v1")
+
 # Task -> model routing. Both tasks default to cloud Nemotron; an operator may
 # point "fast" at a local OpenAI-compatible endpoint via OLLAMA_URL if desired.
 ROUTES = {
-    "fast": os.environ.get("OMNIVAR_FAST_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
-    "reason": os.environ.get("OMNIVAR_REASON_MODEL", "nvidia/nemotron-3-super-120b-a12b"),
+    "fast": os.environ.get("OMNIVAR_FAST_MODEL", NEMOTRON_MODEL),
+    "reason": os.environ.get("OMNIVAR_REASON_MODEL", NEMOTRON_MODEL),
 }
 
 

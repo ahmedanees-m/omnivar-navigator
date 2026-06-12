@@ -35,8 +35,10 @@ Heavy reference data is bind-mounted **read-only** into containers.
 ## LLM
 
 The reasoning/soft-task LLM is **cloud Nemotron** (NVIDIA NIM, OpenAI-compatible
-at `https://integrate.api.nvidia.com/v1`), not a self-hosted Ollama model. See
-`llm/gateway.py`. The key is read from `NVIDIA_API_KEY`.
+at `https://integrate.api.nvidia.com/v1`), not a self-hosted Ollama model. Default
+model: **`nvidia/llama-3.3-nemotron-super-49b-v1`** (Nemotron Super 49B, free
+build.nvidia.com catalog tier — free credits + rate caps, not metered), overridable
+via `NEMOTRON_MODEL`. See `llm/gateway.py`. The key is read from `NVIDIA_API_KEY`.
 
 ## Security
 
