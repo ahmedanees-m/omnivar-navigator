@@ -16,9 +16,9 @@ work proceeds; mirrored to the repo (`docs/`) and pushed to GitHub.
 | Phase | Plan months | Status | Notes |
 |---|---|---|---|
 | **Setup** (infra, repo, data, verification) | — | ✅ | Repo + VM + data parity + source verification complete |
-| **P0** Foundations & rule engine | 1–3 | 🟡 | Schemas/adapter/audit/posterior/point-engine ✅; VCEP loader + specs in progress |
-| **P1** Evidence orchestration (adapters) | 2–5 | ⏳ | Starts with gnomAD/ClinVar/HPO against kept data |
-| **P2** Decision & orchestration core | 4–8 | ⏳ | gap / action_map / VOI / recommend (the novel core) |
+| **P0** Foundations & rule engine | 1–3 | ✅ | Schemas/adapter/audit/posterior/point-engine ✅; **Gate G1 passed** (94.9%); VCEP YAML loader deferred to P1 (AF thresholds) |
+| **P1** Evidence orchestration (adapters) | 2–5 | ⏳ | Next: gnomAD/ClinVar/HPO adapters against kept data + VCEP loader |
+| **P2** Decision & orchestration core | 4–8 | 🟡 | **gap / action_map / VOI / recommend ✅ (tested)**; risk-gate, equity filter, Pareto, case-policy remain |
 | **P3** Equity module | 6–9 | ⏳ | ancestry inference + reliability + routing |
 | **P4** Whole-odyssey layer | 8–11 | ⏳ | case policy, modality escalation |
 | **P5** UI, audit, learning loop | 9–13 | 🟡 | audit ledger ✅; UI/learning queued |
@@ -27,7 +27,7 @@ work proceeds; mirrored to the repo (`docs/`) and pushed to GitHub.
 | **P8** Manuscript + GitHub + Zenodo | 14–18 | 🟡 | repo + CI live; release later |
 | **P9** Web app + LLM + hosting | 15–18 | ⏳ | FastAPI + Caddy + Nemotron |
 
-**Gates:** G1 (rule engine reproduces eRepo) — 🟡 in progress · G2–G6 — ⏳.
+**Gates:** **G1 (rule engine reproduces eRepo) — ✅ PASSED (94.9% exact / 99.9% within-one-bin)** · G2–G6 — ⏳.
 
 ---
 
@@ -84,6 +84,61 @@ work proceeds; mirrored to the repo (`docs/`) and pushed to GitHub.
 - **Method:** kept reference data on VM + `G:`; `data/sources/build_manifest.py`
   fingerprints files (size + md5) into `data/manifest.json`.
 - **Outcome:** store present + parity; manifest builder ready (to run on full store).
+
+---
+
+### Gate G1 — rule engine reproduces ClinGen eRepo — ✅ PASSED
+- **Method:** parsed each of the **12,499** eRepo records' expert-applied evidence
+  codes (`rules/acmg_codes.py`: handles `CODE` / `CODE_Strength` incl. spaced
+  modifiers like `PM3_Very Strong`, BA1 standalone), fed them through the
+  deterministic `point_engine`, and compared the predicted ACMG class to the expert
+  assertion (`eval/validate_erepo.py`, run on the VM where the data lives).
+- **Outcome:** **94.9% exact concordance, 99.9% within-one-bin** (all 12,499 evaluable).
+  Residual >1-bin discordance is dominated by (a) VCEP-specific **BA1-override
+  exceptions** (GJB2 c.109G>A, mitochondrial heteroplasmy) where the general ClinGen
+  default correctly differs, and (b) a minority of records whose listed "Met" codes
+  do not arithmetically match the assertion. Adjacent-bin cells (VUS↔LB, LP↔P) are
+  expected point-band boundary fuzz.
+- **Artifacts:** `rules/acmg_codes.py`, `eval/validate_erepo.py`. **Commits** `4fa3966`, `6e3c8fa`.
+
+---
+
+## Phase 2 — Decision & orchestration engine (the novel core) — 🟡
+
+The scientific centerpiece. Pure-Python, fully unit-tested (no external data needed).
+
+### Step 2.1 — Evidence-gap & conflict analysis — ✅
+- **Method:** `engine/gap.py` — `attainable_codes()` enumerates not-yet-applied codes,
+  gated by patient context (PS2 needs parents; PP1/BS4 need an informative family; PM3
+  needs phasing) and by mechanism (PS3/BS3 only if a validated assay exists for the
+  gene's mechanism). `gap_to_target()` = points to the target band. `detect_conflict()`
+  flags VUS-by-conflict (opposing applied codes).
+- **Outcome:** per-VUS list of "what would move it and by how much"; conflict flagging. Tested.
+
+### Step 2.2 — Mechanism-aware code→action mapping — ✅
+- **Method:** `engine/action_map.py` loads `action_catalog/bleeding.yaml` (ISTH Tier-1,
+  mechanism-keyed). Same code (PS3) → different assays by mechanism.
+- **Outcome:** the **key differentiator** is unit-tested — expression flow cytometry is
+  **excluded** for an *activation*-defect gene (FERMT3/LAD-III) and routed to activation
+  assays (PAC-1) instead.
+
+### Step 2.3 — Value-of-information ranking — ✅
+- **Method:** `engine/voi.py` — posterior `p = posterior(points)`; predictive `q`; expected
+  information gain `EIG = H(p) − E[H(p′)]`; decision utility `E[ΔU]` (reaching a reporting
+  threshold); value density `objective/(α·$ + β·weeks + γ·burden)`; myopic ranking + shallow
+  exhaustive `lookahead`.
+- **Outcome:** ranked actions with EIG + ΔU; calibrated to Tavtigian posterior / Brnich
+  OddsPath. Tested (entropy, monotonic posteriors, cheaper-higher-yield preference, lookahead).
+
+### Step 2.6 — Recommendation assembly — ✅
+- **Method:** `engine/recommend.py` — gap → mechanism-correct actions → VOI ranking →
+  `Recommendation` with current class/posterior, conflict flag, gap, ranked actions
+  (each with expected post-action class + posterior), and a templated explanation.
+- **Outcome:** end-to-end **Glanzmann worked example** reproduced — a VUS at +3 points →
+  recommends flow cytometry (CD41/CD61, ~$450, ~1 wk) → expected PS3 (+4) → posterior ≈0.95
+  → **Likely Pathogenic**. Tested.
+- **Remaining for Phase 2:** risk gate (τ), equity filter hook (Phase 3), explicit Pareto
+  frontier, `case_policy.py` whole-odyssey wrapper. **Commit** `5a74536`.
 
 ---
 
