@@ -58,11 +58,11 @@ engine treats this as a **Bayesian sequential decision problem under budget**.
 ```mermaid
 flowchart TB
     REV["👩‍⚕️ Human-in-the-loop UI — ledger + gap + ranked plan + provenance · accept / override"]
-    subgraph L5["L5 · Decision &amp; orchestration engine (the novel core)"]
+    subgraph L5["L5 · Decision and orchestration engine (the novel core)"]
         direction LR
-        GAP["evidence-gap<br/>&amp; conflict"] --> MAP["mechanism-aware<br/>code → action"] --> VOI["value-of-information<br/>ranking ($ / week)"] --> REC["recommendation +<br/>expected post-action class"]
+        GAP["evidence-gap<br/>and conflict"] --> MAP["mechanism-aware<br/>code → action"] --> VOI["value-of-information<br/>ranking (cost / week)"] --> REC["recommendation +<br/>expected post-action class"]
     end
-    subgraph L4["L4 · deterministic &amp; support layers"]
+    subgraph L4["L4 · deterministic and support layers"]
         direction LR
         RULE["⚙️ Rule engine<br/>(ClinGen/Tavtigian points)"]
         EQ["⚖️ Equity<br/>(reliability + routing)"]
