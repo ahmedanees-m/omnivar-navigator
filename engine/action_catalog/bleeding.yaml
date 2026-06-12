@@ -30,7 +30,7 @@ mechanisms:
 actions:
   flow_cd41_cd61:            {yields: [PS3],      cost_usd: 450,  days: 7,  sens: 0.90, spec: 0.92, modality: functional}
   platelet_activation_pac1:  {yields: [PS3],      cost_usd: 700,  days: 10, sens: 0.85, spec: 0.90, modality: functional}
-  soluble_fibrinogen_binding:{yields: [PS3],      cost_usd: 700,  days: 10, sens: 0.84, spec: 0.90, modality: functional}
+  soluble_fibrinogen_binding: {yields: [PS3],     cost_usd: 700,  days: 10, sens: 0.84, spec: 0.90, modality: functional}
   flow_cd42a_cd42b:          {yields: [PS3],      cost_usd: 450,  days: 7,  sens: 0.88, spec: 0.92, modality: functional}
   flow_cd18_cd11a:           {yields: [PS3],      cost_usd: 450,  days: 7,  sens: 0.90, spec: 0.93, modality: functional}
   vwf_fviii_binding:         {yields: [PS3, BS3], cost_usd: 600,  days: 14, sens: 0.85, spec: 0.90, modality: functional}
