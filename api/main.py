@@ -77,9 +77,38 @@ def handle_case(payload: dict[str, Any]) -> dict[str, Any]:
             "modality": plan.modality.name if plan.modality else None}
 
 
+def handle_diagnose(payload: dict[str, Any]) -> dict[str, Any]:
+    """DISCERN coupled disease x variant diagnosis (plan §9; Phase 8)."""
+    from core.dx_schemas import Feature, FeatureKind
+    from jointdx.factorgraph import Evidence
+    from jointdx.orchestrate import diagnose
+
+    def _feats(items, kind):
+        return [Feature(f["id"], kind, f.get("value", True), observed=f.get("observed", True))
+                for f in items]
+
+    ev = Evidence(
+        variant_gene=payload.get("gene", ""), variant_id=payload.get("variant_id", "V"),
+        genetic_codes=payload.get("codes", []),
+        clinical=_feats(payload.get("clinical", []), FeatureKind.CLINICAL),
+        functional=_feats(payload.get("functional", []), FeatureKind.FUNCTIONAL))
+    rec = diagnose(ev, planned_tx=payload.get("planned_tx"))
+    if rec is None:
+        return {"error": f"no discrimination cluster for gene {ev.variant_gene!r}"}
+    return {
+        "leading": rec.posterior.leading, "decided": rec.posterior.decided,
+        "p_disease": rec.posterior.p_disease, "p_variant": rec.posterior.p_variant,
+        "reclassified": rec.reclassified_variants,
+        "safety_flags": [{"competitor": f.competitor_id, "severity": f.severity,
+                          "message": f.message} for f in rec.safety_flags],
+        "next_observation": rec.next_observation.name if rec.next_observation else None,
+        "explanation": rec.explanation, "audit": rec.audit,
+    }
+
+
 def build_app():  # pragma: no cover - requires fastapi (API image)
     from fastapi import FastAPI
-    app = FastAPI(title="OmniVar Navigator", version="0.0.1")
+    app = FastAPI(title="DISCERN (on the OmniVar foundation)", version="0.0.1")
 
     @app.post("/classify")
     def _classify(payload: dict):
@@ -92,6 +121,10 @@ def build_app():  # pragma: no cover - requires fastapi (API image)
     @app.post("/case")
     def _case(payload: dict):
         return handle_case(payload)
+
+    @app.post("/diagnose")
+    def _diagnose(payload: dict):
+        return handle_diagnose(payload)
 
     @app.get("/health")
     def _health():
