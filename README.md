@@ -141,23 +141,33 @@ triage/       scientist-facing VUS triage (which variant to assay next)
 intake/       free-text to HPO with pertinent-negative capture
 equity/       ancestry reliability, equitable routing, dashboards
 learn/        outcome store and auditable prior updates
-sim/  eval/   simulator and validation harnesses (reader study, VUS reclass, calibration)
+sim/  eval/   simulator; validation harnesses (ERepo reconstruction, Phenopacket benchmark,
+              VUS reclass, misdiagnosis rescue, reader study, calibration)
 llm/  api/    cloud Nemotron gateway and the FastAPI engine endpoints
-deploy/ docker/ data/ figures/ manuscript/ tests/   deployment, images, data, docs, tests
+deploy/ docker/ data/ figures/ tests/   deployment, container images, data scripts, tests
 ```
 
 ## Validation status
 
+Real-data results (Tier A, open data; see `docs/DISCERN_Validation_Results.md`):
+
+* VCEP reconstruction on the real ClinGen Evidence Repository: on 2,653 real
+  VCEP-classified bleeding-gene variants, DISCERN reproduces the expert classification
+  from the applied per-code evidence at 93.0 percent exact and 100 percent within-one-bin,
+  with a 100 percent no-inflation rate (the per-code partition re-sum equals the direct
+  total on every variant). This makes Gate G3 a real calibration result, and the real
+  per-code strengths extracted here replace the earlier placeholders.
+* Diagnosis benchmark on the open GA4GH Phenopacket Store: the general corpus is thin on
+  inherited bleeding disorders, yielding 4 in-cluster cases (LAD-III, Chediak-Higashi);
+  DISCERN is correct on all 4 (Top-1). The diagnosis-accuracy headline needs curated cases
+  and the cohorts below.
 * Gate G1: the reused rule engine reproduces ClinGen eRepo at 94.9 percent exact and 99.9
   percent within-one-bin concordance on 12,499 records.
-* Gate G3 (the circularity fix): re-adding the VCEP bundled codes (PP4, PS3, PP1, PM3)
-  produces an identical joint posterior with no inflation. Verified in
-  `tests/test_vcep_reconstruction.py`.
-* Flagship discrimination (Glanzmann versus LAD-III, 2B versus platelet-type VWD), the
-  safety interlocks, and VUS reclassification are unit tested. The validation harnesses
-  (reader study, VUS reclassification versus 3-star truth, misdiagnosis rescue, and
-  calibration) are built; the pre-registered reader study and the Glanzmann cohort run are
-  future work.
+
+Pending external access (harnesses built, run when access clears): the gold-standard
+BRIDGE-BPD cohort (EGA EGAS00001001172) and an 80-patient ITP misdiagnosis cohort via the
+NIHR BioResource DAC, and a South Indian Glanzmann cohort under local IRB. The full
+protocol and the reader study are pre-registered on OSF before those analyses.
 
 ## Safety
 

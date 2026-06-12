@@ -8,6 +8,9 @@
 .env
 .env.*
 !.env.example
+
+# ---- Private / pre-publication (keep local, do not push) ----
+manuscript/
 secrets/
 **/nvidia_api_key*
 **/GitHub_Access_Token*
