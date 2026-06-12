@@ -86,4 +86,27 @@ DOI on release; managed-access cohorts (Solve-RD/UDN, off critical path).
 
 ---
 
+## Real-data validation (Tier A, 2026-06-13)
+
+Verified all benchmarking sources (DISCERN_Validation_Verification_Report.md) and executed
+the open Tier-A validation on real downloaded data (full results: DISCERN_Validation_Results.md).
+
+- **Tier A1 - VCEP reconstruction on real ClinGen ERepo (headline):** 2,653 real
+  VCEP-classified bleeding-gene variants -> **93.0% exact / 100% within-one-bin**
+  reconstruction, **100% no-inflation** (per-code partition re-sum == direct, every
+  variant). Extracted the **real per-code applied strengths** (PM2/BP4/PP4/PP3/PVS1/...),
+  retiring the placeholder gap; quantified routing (1,443 PP4 points to the coupling, not
+  double-counted). Gate G3 is now a real calibration result. `eval/erepo_reconstruction.py`.
+- **Tier A3 - Phenopacket Store diagnosis:** cloned 11,155 phenopackets; the corpus is thin
+  on bleeding disorders - **4 in-cluster cases** (LAD-III, Chediak-Higashi), **DISCERN 4/4
+  Top-1**. Honest: the diagnosis headline needs curated cases + cohorts (Tier B/C).
+  `eval/phenopacket_benchmark.py`. (PhEval-compatible runner; competitor runs need tool images.)
+- **Tier A2 - VUS reclassification:** variant layer delivered by A1; per-patient rate needs
+  cohort phenotype (Tier B/C), ClinVar 3-star as truth.
+- **Tier B/C (pending external access):** BRIDGE-BPD `EGAS00001001172` + the 80-patient ITP
+  cohort (NIHR BioResource DAC); South Indian Glanzmann cohort (local IRB). Harnesses built
+  (`eval/{misdx_rescue,vus_reclass,reader_study}.py`); run when access clears. Pre-register on OSF.
+
+---
+
 *(Phase sections appended below as they are executed.)*
