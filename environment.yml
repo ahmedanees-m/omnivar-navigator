@@ -30,8 +30,9 @@ dependencies:
   - pip
   - pip:
       - openai                # cloud Nemotron (NVIDIA NIM, OpenAI-compatible)
-      - mavedb                # MaveDB API client
-      - pangolin              # splice scoring (SpliceAI replacement)
+      - mavedb                # MaveDB API client (PyPI package name verified)
       - somalier              # or peddy - ancestry/relatedness from VCF
-      # external tools (autoPVS1, AutoPM3, Exomiser, VEP) installed in tool images,
-      # wrapped via adapters.
+      # NOTE: do NOT `pip install pangolin` - that PyPI name is the SARS-CoV-2
+      # lineage tool. The splice predictor Pangolin (github.com/tkzeng/Pangolin,
+      # GPL-3.0) installs from source and is baked into docker/Dockerfile.tools,
+      # wrapped via adapters (like autoPVS1, AutoPM3, Exomiser, VEP).
