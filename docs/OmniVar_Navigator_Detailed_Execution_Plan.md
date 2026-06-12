@@ -9,6 +9,31 @@
 
 ---
 
+## ⓘ Execution-time verification & corrections (2026-06-12)
+
+Every source/URL/DOI/ID and the core calibration numbers in this plan were
+**independently re-verified by visiting each** (full log:
+*OmniVar_Navigator_Source_Verification_Report.md*, mirrored to `docs/`). **Outcome: all sources are real and the math
+checks out against the originals** (Tavtigian OddsPath 350 / prior 0.10; Pejaver
+REVEL thresholds match Table 2; Brnich PS3 OddsPath 2.1/4.3/18.7; AlphaMissense
+Zenodo 8208688; F8 VCEP GN071; Megy 2019 = 91 Tier-1 genes; AI-MARRVEL NEJM AI
+2024; DeepRare Nature 2026). Corrections to apply at execution:
+
+1. **dbNSFP** (§1.1): `database.liulab.science` is dead → use **https://www.dbnsfp.org** (v5.0a; REVEL/CADD/BayesDel/VEST4/MutPred2 in the *academic* build).
+2. **Pangolin** (§1.1): license is **GPL-3.0**, not MIT; and **`pip install pangolin` installs the SARS-CoV-2 lineage tool** — install the splice Pangolin (github.com/tkzeng/Pangolin) **from source** (already fixed in `environment.yml`).
+3. **EAHAD DBs** (§1.2): now at **https://dbs.eahad.org/<FACTOR>** (old per-gene subdomains redirect).
+4. **AutoPM3** (§1.3): now published in ***Bioinformatics* 2025** (PMC12263107 confirmed).
+5. **LLM layer (§2.5) — superseded by deployment decision:** the project uses the
+   **cloud-hosted NVIDIA Nemotron** (`nvidia/llama-3.3-nemotron-super-49b-v1`, free
+   build.nvidia.com tier, env `NEMOTRON_MODEL`) instead of self-hosted Ollama, freeing
+   the 16 GB A4000. VM access currently uses **password auth via paramiko** (key auth
+   recommended next). Reference data lives on **both** the VM and the `G:` drive, synced
+   via **SFTP only (no rclone)**.
+
+Build status and per-step outcomes are tracked in *Omnivar_Navigator_Execution_Summary.md*.
+
+---
+
 ## How to read this document
 
 Each step uses a fixed template:
