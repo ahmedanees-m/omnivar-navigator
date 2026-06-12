@@ -24,6 +24,7 @@ from engine.gap import (
     gap_to_target,
 )
 from engine.voi import lookahead, pareto_frontier, rank_actions, risk_gate
+from equity.routing import equity_filter
 from rules.point_engine import BANDS, classify
 from rules.posterior import posterior
 
@@ -60,7 +61,8 @@ def recommend_next_action(ledger: PointsLedger, patient: PatientContext, mechani
                           objective: str = "delta_utility", alpha: float = 1.0,
                           beta: float = 50.0, gamma: float = 0.0, tau: float = 0.0,
                           inheritance: str = "", target: Classification = Classification.LP,
-                          tie_eps: float = 0.05, audit=None) -> Recommendation:
+                          tie_eps: float = 0.05, equity_routing: bool = True,
+                          audit=None) -> Recommendation:
     points = ledger.points
     current_class = classify(ledger)
     conflict = detect_conflict(ledger)
@@ -74,6 +76,11 @@ def recommend_next_action(ledger: PointsLedger, patient: PatientContext, mechani
         orth = [a for a in actions if a.modality in ORTHOGONAL_MODALITIES]
         if orth:
             actions = orth
+
+    # Phase 3 equity routing: for under-represented-ancestry patients, route to
+    # ancestry-robust evidence (functional/segregation) over ancestry-biased codes.
+    if equity_routing:
+        actions = equity_filter(actions, patient)
 
     ranked = rank_actions(points, actions, prior_p=prior_p, objective=objective,
                           alpha=alpha, beta=beta, gamma=gamma)
