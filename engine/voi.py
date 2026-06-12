@@ -34,9 +34,26 @@ def _U(p: float, hi: float = 0.90, lo: float = 0.10) -> float:
     return max((p - 0.5) / (hi - 0.5), (0.5 - p) / (0.5 - lo), 0.0)
 
 
+_CODE_K = {"PVS": 8.0, "PS": 4.0, "PM": 2.0, "PP": 1.0,
+           "BVS": 8.0, "BS": 4.0, "BM": 2.0, "BP": 1.0}
+
+
+def action_k(a: Action) -> float:
+    """Points an action's *strongest* yielded code would contribute (PS3->4, PP1->1)."""
+    best = 1.0
+    for c in a.yields_codes:
+        prefix = c[:3] if c[:3] in _CODE_K else c[:2]
+        best = max(best, _CODE_K.get(prefix, 1.0))
+    return best
+
+
 def score_action(points: float, a: Action, prior_p: float = 0.10,
-                 k_pos: float = 4.0, k_neg: float = 4.0) -> dict:
-    """Score one action at the current points. k_pos/k_neg default to PS3/BS3 (±4)."""
+                 k_pos: float | None = None, k_neg: float | None = None) -> dict:
+    """Score one action at the current points. k defaults to the action's yielded strength."""
+    if k_pos is None:
+        k_pos = action_k(a)
+    if k_neg is None:
+        k_neg = action_k(a)
     p = posterior(points, prior_p)
     q = a.sensitivity * p + (1 - a.specificity) * (1 - p)        # P(positive result)
     p_pos = posterior(points + k_pos, prior_p)
@@ -49,10 +66,19 @@ def score_action(points: float, a: Action, prior_p: float = 0.10,
 
 def value_density(points: float, a: Action, alpha: float = 1.0, beta: float = 50.0,
                   gamma: float = 0.0, objective: str = "delta_utility", **kw) -> tuple[float, dict]:
-    """Return (value-per-cost, score-detail). Cost scalarizes $ + time + burden."""
+    """Return (value-per-cost, score-detail). Cost scalarizes $ + time + burden.
+
+    Non-improving actions (objective <= 0) return the raw (negative) objective and are
+    NOT divided by cost — otherwise a larger cost would make a useless action look
+    'least bad' and get top-ranked. This keeps every positive-utility action ranked
+    above every non-improving one, and ranks non-improving ones by raw utility.
+    """
     s = score_action(points, a, **kw)
+    val = s[objective]
     cost = alpha * a.cost_usd + beta * a.turnaround_days / 7.0 + gamma * a.burden
-    return (s[objective] / cost if cost else 0.0), s
+    if val <= 0 or cost <= 0:
+        return val, s
+    return val / cost, s
 
 
 def rank_actions(points: float, actions: list[Action], **kw) -> list[tuple[Action, float, dict]]:
