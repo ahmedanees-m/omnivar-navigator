@@ -1,9 +1,9 @@
 <div align="center">
 
-# 🧬 OmniVar Navigator
+# 🩸 DISCERN
 
-**A rule-grounded, value-of-information clinical decision-support engine that turns a
-VUS from a dead-end into a costed, auditable resolution path.**
+**A coupled disease × variant engine that decodes genetic overlap in inherited bleeding &
+platelet disorders — diagnosis, misdiagnosis-prevention, and VUS resolution in one pass.**
 
 [![CI](https://github.com/ahmedanees-m/omnivar-navigator/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmedanees-m/omnivar-navigator/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/ahmedanees-m/omnivar-navigator/branch/main/graph/badge.svg)](https://codecov.io/gh/ahmedanees-m/omnivar-navigator)
@@ -12,212 +12,202 @@ VUS from a dead-end into a costed, auditable resolution path.**
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](#project-status)
-[![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](tests)
+[![Tests](https://img.shields.io/badge/tests-104%20passing-brightgreen.svg)](tests)
 
-*Priority domain: inherited bleeding & platelet disorders · epilepsy and cancer-predisposition packs follow.*
+*Built on the reused [OmniVar Navigator](docs/OmniVar_Navigator_Detailed_Execution_Plan.md) foundation (rule engine, adapters, equity, audit, infra).*
 
 </div>
 
 ---
 
-## What it is
+## The core idea (read this first)
 
-Every existing variant tool — in-silico predictors (AlphaMissense, REVEL), prioritizers
-(Exomiser, AI-MARRVEL), single-criterion automators (autoPVS1, AutoPM3), and full
-classifiers — **classifies or ranks from the evidence already available.** None answers
-the question a stuck case actually poses:
+Diagnosis, misdiagnosis, and VUS resolution are **not three features — they are three
+readouts of one engine**, because of a single fact:
 
-> *For **this** unsolved patient and **this** uncertain variant, what is the single most
-> informative, cost-effective, ancestry-fair **next action** — and what would it do to the
-> classification?*
+> **PP4 — "this phenotype is specific for one disease" — structurally requires a disease
+> model.** Generic variant classifiers (Varsome, Franklin, AlphaMissense) cannot compute
+> it properly because they do not model the disease. DISCERN can, because the
+> disease-discrimination model **is** the thing PP4 needs.
 
-OmniVar Navigator answers exactly that. It is **decision support, not an autonomous
-classifier**: a deterministic rule engine computes every verdict from a ClinGen/Tavtigian
-points ledger, while a language model only reads, retrieves, and explains — **it never
-produces the classification.**
+So the disease-reasoning layer is **also** a VUS-resolution engine. DISCERN computes one
+**joint posterior over (disease, variant)** and answers one question with three faces:
+***what is the most probable explanation, what would change it, and what is the cheapest
+observation that gets there?***
 
-The key reframing: under the ClinGen/Tavtigian point system, **a VUS is formally an
-evidence deficit** — its accumulated points sit in the uncertain band, short of a
-threshold either way. Resolving it means *acquiring the evidence that closes the gap*. The
-engine treats this as a **Bayesian sequential decision problem under budget**.
+## Why it matters
 
-## Why it's novel
+Inherited bleeding disorders are under-recognised and **frequently misdiagnosed because
+distinct diseases converge on the same phenotype through shared pathways** — and the harm
+is concrete and treatment-changing:
+
+| Look-alikes | Why it's dangerous |
+|---|---|
+| **Glanzmann (ITGA2B/ITGB3)** vs **LAD-III (FERMT3)** | both Glanzmann-type bleeding, but **LAD-III needs a stem-cell transplant** |
+| **2B VWD (VWF)** vs **platelet-type VWD (GP1BA)** | clinically identical, **opposite treatments — DDAVP can harm 2B** |
+| **Bernard-Soulier** vs **ITP** | BSS mistaken for ITP → **needless steroids / splenectomy** |
+| **Factor XIII deficiency** | missed until a **fatal intracranial bleed** |
+
+Compounded by >60% VUS in these genes and the fact that the settings that most need
+disambiguation have the least access to specialist labs.
+
+## Why it's novel (the precise claim)
+
+The *components* — likelihood ratios, factor-graph inference, value-of-information — are
+standard. The **formulation and coupling are novel**: a calibrated joint disease × variant
+model, **anchored to ClinGen gene-specific VCEP rules**, that resolves diagnosis,
+misdiagnosis-safety, and VUS in one pass.
 
 | Contribution | What it means |
 |---|---|
-| 🎯 **Value-of-information over ACMG codes** | Ranks orderable lab actions by expected information gain (and probability of reaching a reportable call) **per dollar and per week** — not just "which test is most sensitive." |
-| 🔒 **Rule-grounded (neurosymbolic) safety** | The classification is computed deterministically from points; the LLM only proposes/explains. Directly answers the documented LLM-hallucination problem in variant interpretation. |
-| ⚖️ **Built-in equity mechanism** | Non-European patients get a VUS 1.5–2× more often, driven by ancestry-biased allele-frequency (PM2) and in-silico (PP3) evidence. The engine down-weights that evidence's reliability and **routes to ancestry-robust actions** (functional / segregation). |
-| 🔁 **Verifiable learning loop** | Realized outcomes update only the cost/yield **priors** (Beta-Bernoulli), each update attributable to specific cases — the verdict logic is never opaquely retrained. |
-| 🧩 **Mechanism-aware routing** | The same code (PS3) maps to different assays by disease mechanism — e.g. it **refuses** to order expression flow cytometry for an *activation*-defect gene (FERMT3/LAD-III) and routes to activation assays instead. |
+| 🔗 **Coupled disease × variant joint model** | `P(D,V|E)` — phenotype→disease, genetics→variant, functional→both; PP4 is the disease→variant coupling, not an added code. |
+| 🧮 **VCEP-anchored, counted once** | Each ACMG code is routed to **exactly one** factor (the per-code circularity fix), so the VCEP's bundled label is never double-counted. Verified by a VCEP-reconstruction test. |
+| 🚑 **Management-aware misdiagnosis flag** | Fires on **treatment danger**, not posterior gap: a small probability of a *treatment-changing* competitor fires (DDAVP+2B, splenectomy+BSS, HSCT+LAD-III). |
+| 🎯 **Cheapest decisive next observation** | Ranks lab / functional **+ segregation + phasing** by information gain over the *joint* posterior — works on partial inputs (the equity case). |
+| 🤐 **Calibrated abstention** | Sparse likelihood ratios → wide credible intervals → "undecidable, here is the deciding observation." Headline safety metric: the **confident-and-wrong rate**. |
 
 ## How it works
 
-### Layered architecture
+### The coupled joint model
 
 ```mermaid
 flowchart TB
-    REV["👩‍⚕️ Human-in-the-loop UI — ledger + gap + ranked plan + provenance · accept / override"]
-    subgraph L5["L5 · Decision and orchestration engine (the novel core)"]
-        direction LR
-        GAP["evidence-gap<br/>and conflict"] --> MAP["mechanism-aware<br/>code → action"] --> VOI["value-of-information<br/>ranking (cost / week)"] --> REC["recommendation +<br/>expected post-action class"]
+    subgraph EV["Evidence (each enters ONCE)"]
+        PH["Phenotype HPO<br/>(+ pertinent negatives)"]
+        GE["Variant-intrinsic ACMG codes<br/>(PM2/BS1, PP3/BP4, PVS1, PM5...)"]
+        FU["Lab / functional<br/>(flow, RIPA, factor activity)"]
     end
-    subgraph L4["L4 · deterministic and support layers"]
-        direction LR
-        RULE["⚙️ Rule engine<br/>(ClinGen/Tavtigian points)"]
-        EQ["⚖️ Equity<br/>(reliability + routing)"]
-        LEARN["🔁 Learning store<br/>(auditable priors)"]
+    subgraph CORE["Joint factor graph — P(D,V | E) ∝ P(Eph|D)·P(Ege|V)·P(Efn|D,V)·P(V|D)·P(D)"]
+        D["disease marginal P(D|E)"]
+        V["variant marginal P(V|E)"]
+        CP["P(V|D) = the calibrated PP4 coupling"]
     end
-    ADP["L3 · Evidence orchestration — swappable adapters:<br/>gnomAD · ClinVar · in-silico · splice · autoPVS1 · MAVE · lit-mining · phenotype · prioritizer"]
-    IN["L1/L2 · Ingestion — VCF + notes→HPO + ancestry + prior assays + family"]
-    IN --> ADP --> RULE --> L5 --> REV
-    EQ -. down-weights .-> RULE
-    EQ -. routes .-> VOI
-    REV -. outcomes .-> LEARN -. priors .-> VOI
+    PH --> D
+    GE --> V
+    FU --> D
+    FU --> V
+    CP -. couples .-> D
+    CP -. couples .-> V
+    D --> OUT1["① Ranked diagnosis + credible intervals"]
+    V --> OUT2["② Measured VUS reclassification"]
+    D --> OUT3["③ Management-aware safety flag"]
+    D --> OUT4["④ Cheapest decisive next observation"]
 ```
 
-### Per-case decision flow
+### Per-case flow
 
 ```mermaid
 flowchart LR
-    V["Variant +<br/>Patient context"] --> ADP["Adapters →<br/>evidence codes"]
-    ADP --> LED["Points ledger<br/>(with provenance)"]
-    LED --> CLS{"Deterministic<br/>class"}
-    CLS -->|"P / LP / B / LB"| DONE["✅ Report"]
-    CLS -->|"VUS"| GAP["Attainable missing<br/>codes + points gap"]
-    GAP --> ACT["Costed, mechanism-<br/>correct actions"]
-    ACT --> RANK["VOI rank<br/>(EIG · ΔU / cost)"]
-    RANK --> OUT["🎯 Recommended next action<br/>+ expected post-action class"]
+    IN["VCF codes + notes→HPO<br/>+ labs (any subset)"] --> RT["route to cluster"]
+    RT --> J["joint P(D,V|E)"]
+    J --> AB{"decide /<br/>abstain?"}
+    AB -->|"confident"| DX["ranked diagnosis<br/>+ VUS reclass"]
+    AB -->|"undecidable"| OBS["cheapest deciding<br/>observation"]
+    DX --> SF["management-aware<br/>safety flag"]
+    SF --> OUT["DxRecommendation<br/>(audited, explained)"]
 ```
+
+## The six discrimination clusters
+
+| Cluster | Look-alikes | Deciding observation | Misdiagnosis harm |
+|---|---|---|---|
+| **Integrin** | Glanzmann · LAD-III · RASGRP2 · LAD-I | leukocytosis + αIIbβ3 activation | LAD-III/I need **HSCT** |
+| **VWF–GPIb** | 2B VWD · PT-VWD · 2A VWD | **RIPA mixing** (plasma vs platelet) | DDAVP harms 2B; opposite Rx |
+| **Macrothrombocytopenia** | Bernard-Soulier · MYH9 · vs ITP | smear / CD42 flow | avoids steroids/splenectomy |
+| **Granule** | HPS · Chediak-Higashi · Gray platelet | EM / smear / HLH workup | CHS → HLH (**HSCT**) |
+| **Thrombocytopenia + leukaemia** | RUNX1 · ETV6 · ANKRD26 | germline panel + pedigree | surveillance; **donor selection** |
+| **Coagulation factor** | F8/F9/F11/F13/fibrinogen | factor assays | FXIII miss → ICH |
+
+Every likelihood ratio is linked to a **PMID + sample size** — a versioned, citable
+knowledge base (the ISTH/ClinGen-partnership target).
 
 ## Inputs & outputs
 
-| | Detail |
-|---|---|
-| **Input** | A `Variant` (gene, HGVS, coordinates) + `PatientContext` (HPO terms, inferred ancestry, parents/family availability, prior assay results, sex). At case level: a VCF + clinical notes. |
-| **Output** | A `Recommendation`: current class + posterior, the points gap, a **ranked list of next actions** — each with cost, turnaround, expected information gain, decision utility, and the **expected post-action classification** — a cost–EIG Pareto frontier, a templated explanation, and a full audit trail. |
+- **Input:** a variant (gene + applied ACMG codes), clinical features (HPO, present **and
+  explicitly absent**), and lab/functional results — **any subset** (partial-input mode).
+- **Output (`DxRecommendation`):** ranked diagnosis with credible intervals, the measured
+  VUS reclassification, management-aware safety flags, the cheapest decisive next
+  observation, a templated explanation, and a full audit trail.
 
-**Worked example (runs end-to-end on real data):**
+**Worked examples (real engine output):**
 
-> Real `F8` p.Arg612Cys → ClinVar **PS1** (Strong) → **+4 points → VUS** →
-> recommends the mechanism-correct **factor activity assay** (~\$250, ~5 days) →
-> expected **PS3** → posterior **0.97** → **Likely Pathogenic**, with the X-linked
-> hemizygote PS4 note.
+> **Glanzmann vs LAD-III** — ITGB3 VUS + recurrent infections → *Leading: LAD-III (73%, CI
+> 55–91%). ⚠ If Glanzmann rather than LAD-III, management changes (HSCT → antifibrinolytics).
+> Cheapest next step: WBC count (leukocytosis).*
+
+> **2B vs PT-VWD + planned DDAVP** — GP1BA + platelet-origin RIPA → *Leading: PT-VWD (84%).
+> ⚠ HARD STOP: DDAVP is contraindicated if 2B VWD (p=0.14) — resolve with the deciding
+> observation first. Cheapest next step: targeted GP1BA vs VWF sequencing.*
 
 ## Quick start
 
 ```bash
-# Dev (laptop): pure-Python core + unit tests on tiny fixtures
-conda env create -f environment.yml      # or: pip install -e ".[dev]"
-conda activate omnivar-nav
-make test                                 # ruff + pytest (76 tests)
-
-# Try the engine
-python -m sim.odyssey_sim                 # VOI vs greedy/random/fixed policies
-python -m eval.validate_erepo data/raw/erepo/erepo_classifications.tab   # Gate G1 (needs data)
-
-# Production (VM): Docker-only — the whole stack
-docker compose -f deploy/compose.vm.yml up -d --build
+conda env create -f environment.yml        # or: pip install -e ".[dev]"
+make test                                  # ruff + pytest (104 tests)
 ```
-
-The Python API mirrors the service contract:
 
 ```python
-from api.main import handle_recommend
-handle_recommend({
-    "gene": "ITGB3", "codes": ["PM2", "PP3"],
-    "mechanism": "integrin_expression", "domain": "bleeding",
-})
-# -> {current_class: "VUS", actions: [...], pareto_frontier: [...], explanation: "...", ...}
+from jointdx.factorgraph import Evidence
+from jointdx.orchestrate import diagnose
+from core.dx_schemas import Feature, FeatureKind
+
+ev = Evidence(variant_gene="GP1BA",
+              clinical=[Feature("ripa_mixing_platelet_origin", FeatureKind.LAB, True)])
+rec = diagnose(ev, planned_tx="ddavp")
+print(rec.posterior.leading, rec.explanation)      # -> ptvwd + DDAVP hard-stop flag
 ```
 
-## Repository structure
+API: `POST /diagnose` (FastAPI, served on the VM). `docker compose -f deploy/compose.vm.yml up -d`.
+
+## Repository structure (DISCERN modules in **bold**)
 
 ```
-omnivar-navigator/
-├── core/                  # shared schemas, the EvidenceAdapter contract, hash-chained audit ledger
-│   ├── schemas.py         #   Variant, PatientContext, EvidenceContribution, PointsLedger, Action, ...
-│   ├── adapter.py         #   EvidenceAdapter ABC — the swappability contract
-│   └── audit.py           #   immutable, tamper-evident reasoning trace
-├── rules/                 # deterministic classification (verdicts never come from an LLM)
-│   ├── point_engine.py    #   points → class (Tavtigian bands, BA1 pre-filter)
-│   ├── posterior.py       #   points → posterior probability (OddsPath = 350^(C/8))
-│   ├── acmg_codes.py      #   parse ACMG code strings (CODE / CODE_Strength) → signed points
-│   ├── vcep_loader.py     #   gene-specific VCEP specs (AF thresholds, mechanism, inheritance)
-│   └── specs/             #   base_acmg.yaml, F8.yaml (GN071), SCN1A.yaml, BRCA1.yaml
-├── adapters/              # one per evidence code/group — "sources" in action (all swappable)
-│   ├── gnomad.py          #   PM2/BS1/BA1  (live gnomAD v4 GraphQL API)
-│   ├── clinvar.py         #   PS1/PM5      (index built from kept variant_summary)
-│   ├── insilico.py        #   PP3/BP4      (calibrated Pejaver-2022 REVEL thresholds)
-│   ├── splice.py          #   PP3/BP4/BP7 + RNA-resolvable flag  (Pangolin)
-│   ├── autopvs1.py        #   PVS1         (ClinGen SVI null-variant tree)
-│   ├── mave.py            #   PS3/BS3      (Brnich-2020 OddsPath calibration)
-│   ├── litmine_pm3.py     #   PM3/PS4      (AutoPM3 + RAG; LLM proposes WITH citations)
-│   ├── phenotype.py       #   PP4          (HPO Resnik / best-match-average)
-│   └── prioritizer.py     #   candidate belief state (Exomiser / AI-MARRVEL)
-├── engine/                # the novel core
-│   ├── gap.py             #   evidence-gap & conflict analysis; recessive/X-linked
-│   ├── action_map.py      #   mechanism-aware code → action mapping
-│   ├── voi.py             #   value-of-information (EIG + ΔU, Pareto, risk gate, lookahead)
-│   ├── recommend.py       #   recommendation assembly + templated explanation + audit
-│   ├── case_policy.py     #   whole-odyssey routing (variant vs modality; stop/wait/matchmake)
-│   └── action_catalog/    #   bleeding.yaml · epilepsy.yaml · cancer.yaml (mechanism-keyed)
-├── equity/                # ancestry inference · reliability down-weighting · routing · dashboards
-├── learn/                 # outcome store + Beta-Bernoulli prior updates (verdict never retrained)
-├── sim/                   # parametric odyssey simulator + baseline policies
-├── eval/                  # ablation · calibration (ECE) · equity-gap · retrospective · stats · G1
-├── llm/                   # gateway (cloud Nemotron, OpenAI-compatible) + RAG — soft tasks only
-├── api/                   # FastAPI engine endpoints: /classify /recommend /case
-├── deploy/                # compose.vm.yml · Caddyfile (TLS+auth) · remote.py (SSH/SFTP, env secrets)
-├── docker/                # Dockerfile.{api,worker,tools}  (Docker-only on the VM)
-├── data/                  # source download/cache scripts + manifest.json (versions, checksums)
-├── figures/               # programmatic, regenerable manuscript figures (300 dpi)
-├── manuscript/            # outline + claims-map (every claim → evidence → code)
-├── docs/                  # concept brief, detailed execution plan, Phase-2 design, topology, security
-└── tests/                 # 76 unit tests (fast, no network/heavy deps)
+core/                  shared schemas + DISCERN data model (dx_schemas.py)   [reuse+extend]
+rules/  rules/vcep/    ACMG engine + **machine-readable VCEP specs + per-code PARTITION**
+adapters/              gnomAD, ClinVar, in-silico, splice, autoPVS1, MAVE, phenotype  [reuse]
+evidence/              **genetic (variant-intrinsic) · phenotype LR (+negatives) · lab/functional**
+diseases/  clusters/   **disease ontology + 6 provenance-tagged discrimination clusters**
+jointdx/               **THE NOVEL CORE: factorgraph · infer · uncertainty · abstain · orchestrate · explain**
+safety/                **management-aware misdiagnosis / treatment-safety interlock**
+nextobs/               **cheapest decisive next observation · partial-input · what-if**
+triage/                **scientist-facing VUS-triage (which to assay next)**
+intake/                **free-text → HPO with pertinent negatives (LLM soft task)**
+equity/  learn/        ancestry reliability + routing; auditable prior updates           [reuse]
+sim/  eval/            simulator; **reader-study, VUS-reclass, misdx-rescue, calibration**
+llm/ api/ deploy/ docker/ data/ figures/ manuscript/ tests/                              [reuse]
 ```
 
 ## Validation status
 
-- **Gate G1 — rule engine reproduces ClinGen eRepo:** ✅ **94.9% exact / 99.9%
-  within-one-bin** concordance on all 12,499 expert classifications (`eval/validate_erepo.py`).
-- **Simulator (honest, not overfit):** VOI beats the naive random baseline (cheaper +
-  more accurate) and uses no more tests than greedy; graceful-degradation is cheapest.
-  VOI does **not** dominate a strong *cost-aware* greedy on a homogeneous cohort — an
-  expected negative we report rather than hide. The simulator also surfaced and fixed two
-  real engine bugs.
-- **Domain-agnosticism:** the same engine routes epilepsy → patch-clamp and cancer → MAVE
-  with new packs only (no core change) — unit-tested.
+- **Gate G1** — the reused rule engine reproduces ClinGen eRepo: ✅ **94.9% exact / 99.9%
+  within-one-bin** (12,499 records).
+- **Gate G3** — the **circularity fix**: re-adding the VCEP's bundled PP4/PS3/PP1/PM3 codes
+  produces an **identical** joint (no inflation) — ✅ verified (`tests/test_vcep_reconstruction.py`).
+- Flagship discrimination (GT↔LAD-III, 2B↔PT-VWD), safety interlocks, and VUS
+  reclassification are unit-tested. Validation **harnesses** (reader study, VUS-reclass vs
+  3-star, misdiagnosis-rescue, calibration/abstention) are built; the pre-registered
+  reader study and the South Indian Glanzmann cohort run are future work.
 
-> Validation harnesses (ablation, calibration, equity-gap, retrospective journeys) are
-> built; real-cohort and managed-access (Solve-RD/UDN) runs are pre-registered future work.
+## Safety
 
-## Reproducibility & safety
-
-- **Pinned & containerized** — `environment.yml` + Dockerfiles + `data/manifest.json`
-  (source versions/checksums) + a seeded simulator. Every source URL/DOI was independently
-  re-verified (see `docs/OmniVar_Navigator_Source_Verification_Report.md`).
-- **Docker-only on the server**; secrets read from the environment, never committed.
-- **No real patient data** in the repo or any public/hosted artifact; the public demo runs
-  on synthetic + public data only. This stays decision support — human sign-off required.
-- **Compute topology:** laptop = code + tests; VM = all heavy work + hosting; cloud Nemotron
-  for soft LLM tasks; data on both, synced via SFTP. See `docs/COMPUTE_TOPOLOGY.md`.
+DISCERN **abstains** when sparse likelihood ratios can't support a call (credible intervals
+propagated from each LR's sample size), reports the **confident-and-wrong rate**, and never
+auto-diagnoses or auto-treats — it recommends, with human sign-off and a full audit trail.
+No real patient data in any public artifact.
 
 ## Project status
 
-All nine planned phases are **code-complete and unit-tested** (foundations, evidence
-adapters, the decision core, equity, whole-odyssey, learning loop, validation harnesses,
-domain packs, and the deployment/release artifacts). What remains is **external
-dependencies, not missing code** — building the external-tool images on the VM, the web UI
-front-end, the headline real-cohort ablation run, and extracting the exact F8 GN071
-allele-frequency thresholds (currently clearly-marked placeholders). See
-[`docs/Omnivar_Navigator_Execution_Summary.md`](docs/Omnivar_Navigator_Execution_Summary.md)
-for the full per-phase log.
+DISCERN Phases 0–10 are **code-complete and unit-tested** on the reused OmniVar foundation
+(VCEP loaders + per-code partition, the three evidence streams, the six-cluster KB, the
+coupled joint model, abstention, the safety interlock, the next-observation core, intake,
+the `/diagnose` API, the validation harnesses, and VUS-triage). Remaining work is external:
+the pre-registered reader study, the Glanzmann cohort run, exact VCEP threshold extraction,
+and the web UI. See [`docs/DISCERN_Execution_Summary.md`](docs/DISCERN_Execution_Summary.md).
 
 ## License & citation
 
-Code is released under the [MIT License](LICENSE). Reference datasets retain their own
-upstream licenses (see `data/manifest.json`). If you use OmniVar Navigator, please cite it
-via [`CITATION.cff`](CITATION.cff).
+[MIT](LICENSE). Reference datasets retain their upstream licenses. Cite via
+[`CITATION.cff`](CITATION.cff). Sources independently verified —
+[`docs/DISCERN_Source_Verification_Report.md`](docs/DISCERN_Source_Verification_Report.md).
 
 **Author:** Anees Ahmed Mahaboob Ali ([@ahmedanees-m](https://github.com/ahmedanees-m))
