@@ -18,7 +18,7 @@ real eRepo; CSpec frequency criteria for GT/F8/F9/VWF/GP1BA).
 | **Setup** Source & dataset verification | done | `DISCERN_v3.1_Source_Verification_Report.md`; all citations real; corrections folded in below |
 | **A1** Genome-wide partition + ClinVar concordance | done (gnomAD gated) | H1: 100% coverage on 12,240 variants/170 genes; H2: 33.2% inflation-prevented (CI 32.4-34.1); H3: ClinVar within-1-bin 92.8%. gnomAD per-variant cross-check data-gated (only constraint metrics on VM) |
 | **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | queued | REVEL + Pangolin(real version) + AlphaMissense(CC BY 4.0); PVS1/PS4 trees; RUNX1 BA1/BS1 |
-| **A3** Variant calibration (isotonic/Platt; ECE/Brier) | queued | vs ClinVar 2*+ |
+| **A3** Variant calibration (isotonic/Platt; ECE/Brier) | done | 7,521 P/B variants; isotonic ECE 0.008 / Brier 0.0073 (vs uncalibrated 0.201/0.060); AUC 0.999. H5 variant-half met |
 | **B1** Cluster curation C4->C3->C5->C8->C6->C7->C9->(C10) | in progress | C4 (RUNX1/ANKRD26/ETV6 vs ITP/MDS) first |
 | **B2** Uncertainty + selective/conformal prediction | queued | Mondrian split-conformal; abstention threshold |
 | **B3** Safety-interlock hardening (leading-call fix + per-cluster map) | partial | leading-call hard-stop defect FIXED + regression test (108 tests); per-cluster contraindication map pending with B1 clusters |
@@ -96,3 +96,29 @@ disagreement and the full-code band vs ClinVar are an A1 refinement for the next
 **Data-gated:** the gnomAD per-variant frequency cross-check (A1's `gnomad_freq_check.py`) is NOT
 run - only gene-level `gnomad.v4.0.constraint_metrics.tsv` is on the VM, not per-variant AFs.
 Flagged, not silently skipped; pull per-variant gnomAD AFs (or use eRepo-embedded AFs) to close it.
+
+### 2026-06-13 - B1/B3 cluster coverage C4-C10 (done)
+Built the full confusable-cluster catalog (`eval`/diseases/clusters + `tests/test_v31_clusters.py`):
+**C4** (highest priority) enhanced - RUNX1/ANKRD26/ETV6 **vs ITP** with discriminating features
+(family history, normal platelet size, AD pattern, dysmegakaryopoiesis, immunosuppression
+response) and the per-cluster SAFETY map (splenectomy + immunosuppression contraindicated when
+an inherited thrombocytopenia is plausible; affected-relative-not-donor). New clusters: **C5**
+(2N VWD vs mild hemophilia A, VWF:FVIIIB decisive), **C7** (alpha-granule: NBEAL2/GFI1B/ARC +
+Quebec/PLAU with platelet-transfusion contraindicated -> antifibrinolytics), **C9** (type-1/low-VWF
+calibration-demo), **C10** (Scott/ANO6 PS-exposure capstone). Every LR carries a PMID; the
+**`test_every_feature_lr_is_sourced` CI guard enforces the no-fabricated-LR rule.** 10 clusters,
+117 tests. Zaninetti->MDS / Joshi-Cooper->ITP and the "low VWF" descriptive framing applied.
+
+### 2026-06-13 - B2 conformal selective prediction (done; coverage cohort-gated)
+`jointdx/conformal.py`: Mondrian (per-class) split-conformal over the diagnosis posterior;
+selective mode commits only on a singleton conformal set, else abstains (composes with abstain.py).
+Synthetic model-faithful sanity test confirms the per-class coverage guarantee holds; real-label
+coverage (H5 diagnosis half / G11) is cohort-gated, not claimed on synthetic data.
+
+### 2026-06-13 - A3 variant calibration (done; H5 variant half / Gate G11)
+`eval/variant_calibration.py` (pure-stdlib PAV isotonic + Platt + Brier/ECE/AUC) on the VM,
+joining DISCERN variant-intrinsic Tavtigian points to ClinVar P/B labels: **7,521 labeled
+variants (4,904 pathogenic), test n=3,761.** AUC **0.9992** (honest: these are VCEP P/B extremes
+with VUS dropped, so discrimination is easy - the deliverable is calibration). Calibration: ECE
+**0.201 (uncalibrated) -> 0.088 (Platt) -> 0.008 (isotonic)**; Brier **0.060 -> 0.024 -> 0.0073**.
+Isotonic-calibrated probabilities meet the H5 variant-half "calibrated probabilities" bar.
