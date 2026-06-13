@@ -20,11 +20,14 @@ Ran `eval/erepo_reconstruction.py` over the real ClinGen Evidence Repository exp
 
 **Observed per-code applied-strength distribution** (the VCEPs' own applied codes): PM2
 1862, BP4 1010, PP4 593, BP7 564, PP3 523, PVS1 492, PM3 427, PS4 266, PM5 244, BA1 198,
-PM1 196, PS3 167. This is the real *observed frequency* of applied strengths - which is
-distinct from the per-gene *rule* strength tables in `rules/vcep/specs/*.yaml`. Those YAMLs
-still hold documented defaults pending extraction from the CSpec machine-readable specs
-(GN079 ITGA2B/ITGB3, GN071 F8, GN081 VWF); that extraction is the genuine outstanding
-placeholder item (see the execution summary remaining-work list).
+PM1 196, PS3 167. This is the real *observed frequency* of applied strengths. The per-gene
+*rule* strength tables in `rules/vcep/specs/*.yaml` were subsequently EXTRACTED and verified
+(2026-06-13): the CSpec frequency criteria (BA1/BS1/PM2) and the PM2_Supporting strength are
+now real for GT/F8/F9/VWF/GP1BA, from the CSpec registry (GN071 F8/F9, GN079 GP1BA, GN081 VWF -
+note GN079 is the GP1BA spec, NOT GT, an earlier mislabel) cross-checked against the VCEPs'
+own eRepo records. See `DISCERN_VCEP_Spec_Verification_Report.md`. The only residual
+placeholders are the variant-dependent PVS1/PS4 strength decision trees (a documented
+simplification, not a fillable value) and RUNX1's BA1/BS1 numeric thresholds.
 
 **Points routed out of the genetic stream, by owning factor:** PP4 **1,443** (to the
 disease-to-variant coupling), phasing 534, functional 393, segregation 260, de-novo 67.

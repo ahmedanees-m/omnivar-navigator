@@ -80,9 +80,13 @@ GT/HSCT divergence, recommends WBC. GP1BA + platelet-origin RIPA + planned DDAVP
 84%, **HARD STOP on DDAVP**, recommends GP1BA/VWF sequencing.
 
 ## Honest remaining work (external dependencies, not missing code)
-Pre-registered reader study + South Indian Glanzmann cohort run (Gate G5); extract exact
-per-code VCEP strength tables (currently documented placeholders); web UI; hosting + Zenodo
-DOI on release; managed-access cohorts (Solve-RD/UDN, off critical path).
+Pre-registered reader study + South Indian Glanzmann cohort run (Gate G5); the
+variant-dependent strength decision trees (PVS1 by NMD/domain; PS4 by proband ratio) and
+wiring the documented REVEL/SpliceAI cut-offs into the in-silico adapter; RUNX1 BA1/BS1
+numeric thresholds; web UI; hosting + Zenodo DOI on release; managed-access cohorts
+(Solve-RD/UDN, off critical path). NOTE (2026-06-13): the per-code CSpec FREQUENCY criteria
+(BA1/BS1/PM2) + PM2_Supporting strength are now extracted/verified for GT/F8/F9/VWF/GP1BA -
+they are no longer placeholders (see DISCERN_VCEP_Spec_Verification_Report.md).
 
 ---
 
@@ -98,9 +102,14 @@ the open Tier-A validation on real downloaded data (full results: DISCERN_Valida
   non-genetic codes appear in **31.7%** of variants, routing **1,443** PP4 points to the
   coupling (393 functional, 794 seg/phasing) out of the genetic stream; a naive bottom-line
   score would over-classify **549 (20.7%)**. The earlier "100% no-inflation" metric was a
-  tautology and was replaced. The observed applied-strength distribution is real; the
-  per-gene CSpec rule-strength tables in `rules/vcep/specs` remain documented defaults (the
-  outstanding placeholder item). `eval/erepo_reconstruction.py` + `tests/test_erepo_eval.py`.
+  tautology and was replaced. The observed applied-strength distribution is real, and as of
+  **2026-06-13 the per-gene CSpec frequency criteria (BA1/BS1/PM2) + PM2_Supporting strength
+  are now EXTRACTED and verified** for GT/F8/F9/VWF/GP1BA (CSpec GN071/GN079/GN081 + the
+  VCEPs' own eRepo records; see `DISCERN_VCEP_Spec_Verification_Report.md`). Residual: the
+  variant-dependent PVS1/PS4 strength trees stay at ACMG baseline (documented simplification),
+  RUNX1 BA1/BS1 are pending, and F8/F9 "absent-in-males" PM2 is a low numeric proxy. This does
+  **not** change the 93.0% (that eval reads strengths from eRepo directly, not the YAMLs).
+  `eval/erepo_reconstruction.py` + `eval/erepo_thresholds.py` + `tests/test_erepo_eval.py`.
 - **Tier A3 - Phenopacket Store diagnosis:** cloned 11,155 phenopackets; the corpus is thin
   on bleeding disorders - **4 in-cluster cases** (LAD-III, Chediak-Higashi), **DISCERN 4/4
   Top-1**. Honest: the diagnosis headline needs curated cases + cohorts (Tier B/C).

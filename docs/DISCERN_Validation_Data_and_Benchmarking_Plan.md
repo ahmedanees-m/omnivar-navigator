@@ -11,6 +11,20 @@ as a headline result anywhere. **Date:** 2026-06-13
 
 ---
 
+> ## Editorial correction (2026-06-13) - supersedes the "no-inflation / G3-as-calibration" framing in this document
+>
+> Tier A was executed on real open data. Wherever this plan says the VCEP-reconstruction test gives
+> "no inflation," "calibration, not just plumbing," or "G3 becomes a calibration result," read this:
+>
+> - The original "100% no-inflation rate" was a **tautology** (it summed the same points twice and returned 100% for any input) and was **removed**, not reported.
+> - **Gate G3 = no double-counting**, verified two ways: (i) the variant-marginal invariance unit test, and (ii) per-code routing on **2,653 real VCEP variants** - 100% partition coverage (0 unknown), owned non-genetic codes in 31.7% of variants, naive all-codes over-classifies 549 (20.7%). G3 is **not** a calibration of the disease->variant coupling; that needs paired-phenotype cohorts (Tier B/C).
+> - The reconstruction test is **ACMG combining-rule fidelity**: 93.0% exact / 100% within-one-bin, point-engine arithmetic given the experts' own codes (not code assignment, not coupling).
+> - "Kills the placeholders" is now largely DONE (2026-06-13): the per-gene CSpec frequency criteria (BA1/BS1/PM2) + PM2_Supporting strength were extracted and verified for GT/F8/F9/VWF/GP1BA from the CSpec registry (GN071/GN079/GN081) cross-checked with the VCEPs' eRepo records. Residual = the variant-dependent PVS1/PS4 strength trees (documented simplification) + RUNX1 BA1/BS1. See `DISCERN_VCEP_Spec_Verification_Report.md`. (NB: GN079 is the GP1BA spec, not GT.)
+>
+> Executed results: `DISCERN_Validation_Results.md` and `docs/DISCERN_Execution_Summary.md`.
+
+---
+
 ## 1. Access tiers (read this first)
 
 | Tier | Meaning | Timeline | Use |
@@ -25,7 +39,9 @@ The first paper can stand on **Tier A alone**; Tiers B/C elevate it and should r
 
 ## 2. Variant-level validation — **TIER A, fully open** (do this first; it kills the placeholders)
 
-This is the layer that directly fixes the "per-code strengths are placeholders" gap and turns the reconstruction test into a real calibration result.
+This is the layer that directly fixes the "per-code strengths are placeholders" gap and turns the reconstruction test into a real partition result on expert data (combining fidelity + no double-counting); calibration of the coupling awaits the cohorts.
+
+> **[Corrected 2026-06-13]** Run on real ERepo: the reconstruction test is **ACMG combining-rule fidelity** (93.0% exact), and the per-code partition gives a real no-double-counting result (100% coverage; over-classifies 549/2,653). It is not a coupling "calibration." The per-gene CSpec *rule* tables in `rules/vcep/specs/*.yaml` were subsequently extracted/verified (frequency criteria + PM2_Supporting for GT/F8/F9/VWF/GP1BA); residual = PVS1/PS4 trees + RUNX1. See the top-of-doc correction.
 
 | Source | What you get | How | DISCERN use |
 |---|---|---|---|
@@ -38,6 +54,8 @@ This is the layer that directly fixes the "per-code strengths are placeholders" 
 **Target genes (your clusters):** ITGA2B, ITGB3 (GT) · F8, F9, F11, F13, FGA/B/G (coag) · VWF (2A/2B/2M) · GP1BA, GP1BB, GP9 (BSS / PT-VWD) · RUNX1, ETV6, ANKRD26 · MYH9 · NBEAL2. Pull each gene's ERepo records + CSpec spec; FERMT3/RASGRP2/granule genes have **no spec** (keep the reduced-confidence tag).
 
 > **Deliverable from Tier A alone:** "DISCERN reconstructs ClinGen VCEP classifications from their own per-code evidence with no inflation, and reclassifies X% of bleeding-gene VUS concordant with 3-star truth." That is a real, citable, publishable methods+validation result — obtainable in weeks, no permissions.
+
+> **[Corrected 2026-06-13]** The achieved Tier-A deliverable is: "DISCERN reproduces ClinGen VCEP bottom-line labels from the experts' own per-code evidence at 93.0% exact / 100% within-one-bin, and partitions every applied code to one owning factor (100% coverage), preventing the double-counting that would over-classify 549 of 2,653 variants." The VUS-reclassification *rate* needs paired phenotype (Tier B/C); the open variant DBs do not supply it standalone. "No inflation" here = the per-code partition, not the deleted tautological metric.
 
 ---
 
@@ -88,11 +106,14 @@ The **South Indian Glanzmann clinical-exome cohort** — real, ancestry-relevant
 | Calibration / abstention | all labeled sets | reliability, Brier, ECE, confident-wrong rate | A/B |
 | Clinical usefulness | **reader study** (vignettes) | accuracy & time, with vs without | own (pre-reg) |
 
+> **[Corrected 2026-06-13]** The "No double-counting (G3, calibrated)" row should read **"No double-counting (G3), VCEP per-code partition"** - the metric is partition coverage + points routed out + inflation prevented on 2,653 real variants, not a "calibrated reconstruction." The "calibrated" qualifier and "no inflation" wording reflect the deleted tautological metric. See the top-of-doc correction.
+
 ---
 
 ## 6. The honest order of operations
 
 1. **NOW (Tier A, weeks):** pull **ERepo + CSpec** → real per-code strengths into `rules/vcep/` → run `test_vcep_reconstruction.py` on **real VCEP variants** → placeholders gone, G3 becomes a calibration result.
+   > **[Corrected 2026-06-13 - done]** ERepo was pulled and the reconstruction ran on 2,653 real variants (93.0% exact fidelity; 100% partition coverage; G3 = no double-counting confirmed). The CSpec machine-readable pull was then completed too: the frequency criteria (BA1/BS1/PM2) + PM2_Supporting strength are extracted/verified for GT/F8/F9/VWF/GP1BA (GN071/GN079/GN081 + eRepo). Residual = PVS1/PS4 variant-dependent trees + RUNX1 BA1/BS1. G3 is no-double-counting, not a coupling calibration. See the top-of-doc correction and `DISCERN_VCEP_Spec_Verification_Report.md`.
 2. **NOW (Tier A, weeks):** **VUS-reclassification** vs ClinVar 3-star.
 3. **NOW (Tier A, weeks):** **Phenopacket Store** bleeding subset + curated cases → **PhEval head-to-head** vs Exomiser/LIRICAL/AI-MARRVEL.
 4. **PARALLEL (Tier B, start immediately — long lead):** NIHR BioResource DAC application for **BRIDGE-BPD (EGAS00001001172)** + the **ITP cohort**.

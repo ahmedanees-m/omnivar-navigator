@@ -184,9 +184,13 @@ human sign-off and a full audit trail. No real patient data appears in any publi
 ## Project status
 
 DISCERN phases 0 through 10 are code complete and unit tested on the reused OmniVar
-foundation. Remaining work is external: the pre-registered reader study, the South Indian
-Glanzmann cohort run, extraction of the exact per-code VCEP strength tables (currently
-documented placeholders), and the web interface. See
+foundation. The per-code VCEP frequency criteria (BA1/BS1/PM2) and the PM2 Supporting
+strength were extracted and verified for the ITGA2B/ITGB3, F8, F9, VWF, and GP1BA specs
+from the ClinGen CSpec registry and the panels' own Evidence Repository records (see
+docs/DISCERN_VCEP_Spec_Verification_Report.md); the remaining in-specification item is the
+variant-dependent PVS1 and PS4 strength decision trees, kept at ACMG baseline as a
+documented simplification. Remaining external work: the pre-registered reader study, the
+South Indian Glanzmann cohort run, and the web interface. See
 [docs/DISCERN_Execution_Summary.md](docs/DISCERN_Execution_Summary.md) for the full
 per-phase log.
 

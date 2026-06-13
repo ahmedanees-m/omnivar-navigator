@@ -8,6 +8,20 @@
 
 ---
 
+> ## Editorial correction (2026-06-13) - supersedes the "no-inflation / G3-as-calibration" framing in this document
+>
+> The Tier-A real-data run replaced one metric and reframed another. Wherever this plan says the
+> VCEP-reconstruction test yields "no inflation" or "a calibration result," read the corrected version:
+>
+> - The original "100% no-inflation rate" was a **tautology** (it summed the same points twice and returned 100% for any input). It has been **removed**, not reported.
+> - **Gate G3 = no double-counting**, verified two ways: (i) a unit test that the variant marginal is invariant to bundled PP4/PS3/PP1/PM3 codes, and (ii) per-code routing on **2,653 real VCEP variants** - 100% partition coverage (0 unknown), owned non-genetic codes in 31.7% of variants, and a naive all-codes score would over-classify 549 (20.7%). G3 is **not** a calibration of the disease->variant coupling; that awaits paired-phenotype cohorts (Tier B/C).
+> - The reconstruction test is **ACMG combining-rule fidelity** (93.0% exact / 100% within-one-bin) - point-engine arithmetic given the experts' own codes; it does not test code assignment and does not test the coupling.
+> - "Placeholders gone" is now largely DONE (2026-06-13): the per-gene CSpec frequency criteria (BA1/BS1/PM2) + PM2_Supporting strength were extracted and verified for GT/F8/F9/VWF/GP1BA from the CSpec registry (GN071/GN079/GN081) cross-checked with the VCEPs' eRepo records. Residual = the variant-dependent PVS1/PS4 strength trees (documented simplification) + RUNX1 BA1/BS1. See `DISCERN_VCEP_Spec_Verification_Report.md`. (NB: GN079 is the GP1BA spec, not GT.)
+>
+> Executed results: `DISCERN_Validation_Results.md` and `docs/DISCERN_Execution_Summary.md`.
+
+---
+
 ## 1. Source Registry
 
 ### 1.1 NEW & primary — ClinGen gene-specific VCEP rules (the anchor)
@@ -143,6 +157,7 @@ class Recommendation:                             # the engine's output
   This step emits a likelihood over `VariantState` using **only the variant-intrinsic codes**; everything else is owned elsewhere, so each code enters the joint model exactly once.
 - **Code:** `evidence/genetic.py::variant_intrinsic_likelihood(variant, ledger, spec) -> dict[VariantState,float]`; `rules/vcep/partition.py` (code→factor map per spec).
 - **Acceptance test (also a calibration check):** feed DISCERN the *same* evidence the VCEP had and confirm the joint model **reconstructs the VCEP's classification with no inflation** — `tests/test_vcep_reconstruction.py`.
+  > **[Corrected 2026-06-13]** This is ACMG combining-rule fidelity (point-engine arithmetic, 93.0% exact on real ERepo), not a coupling "calibration." The no-inflation guarantee is the per-code partition (no double-counting), verified by the invariance unit test plus per-code routing on 2,653 real variants - not the tautological "100% no-inflation rate," which was removed. See the top-of-doc correction.
 - **Expected:** calibrated, VCEP-anchored genetic likelihood from variant-intrinsic codes only; provenance + confidence tag; no code double-counted downstream.
 
 **1.2 Phenotype likelihood ratios with pertinent negatives**
@@ -291,6 +306,7 @@ class Recommendation:                             # the engine's output
 **9.2 VUS-reclassification accuracy**
 - **Goal:** % input VUS reclassified, **concordant with VCEP/ClinVar 3-star**; vs InterVar/Varsome (which can't use a disease model).
 - **Calibration prerequisite (the cleanest joint-model check):** on the VCEP's own published variants, feeding DISCERN the *same* evidence must reconstruct the VCEP classification **with no inflation** (`tests/test_vcep_reconstruction.py`). Passing this is the precondition for trusting any reclassification claim — it proves the per-code partition prevents double-counting.
+  > **[Corrected 2026-06-13]** Done on real data: 93.0% exact ACMG combining-rule fidelity and a 100%-coverage per-code partition (over-classifies 549/2,653 under a naive all-codes score). This proves no double-counting (the stated purpose) but is arithmetic fidelity, not a calibration of the disease->variant coupling, which still awaits cohorts. See the top-of-doc correction.
 - **Code:** `eval/vus_reclass.py`.
 
 **9.3 Management-aware misdiagnosis-rescue (honest case-control)**

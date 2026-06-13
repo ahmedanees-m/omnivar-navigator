@@ -14,5 +14,6 @@ af:
   ba1: 0.001
   bs1: 0.0001
   pm2: 0.00001
-code_strengths: {}
-notes: "Germline cancer-risk implication; surveillance + donor selection. AF thresholds placeholder."
+code_strengths:
+  PM2: PP            # VERIFIED Supporting (1040/1054 PM2 records in ERepo, 2026-06-13)
+notes: "Germline cancer-risk implication; surveillance + donor selection. PM2 verified Supporting from eRepo; BA1/BS1 AF thresholds still pending the MM-VCEP RUNX1 table (not re-verified this round)."
