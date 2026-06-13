@@ -16,12 +16,12 @@ real eRepo; CSpec frequency criteria for GT/F8/F9/VWF/GP1BA).
 | Track / Phase | Status | Notes |
 |---|---|---|
 | **Setup** Source & dataset verification | done | `DISCERN_v3.1_Source_Verification_Report.md`; all citations real; corrections folded in below |
-| **A1** Genome-wide partition + ClinVar concordance | in progress | partition genome-wide + ClinVar 2*+ concordance runnable on VM; gnomAD per-variant cross-check data-gated |
+| **A1** Genome-wide partition + ClinVar concordance | done (gnomAD gated) | H1: 100% coverage on 12,240 variants/170 genes; H2: 33.2% inflation-prevented (CI 32.4-34.1); H3: ClinVar within-1-bin 92.8%. gnomAD per-variant cross-check data-gated (only constraint metrics on VM) |
 | **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | queued | REVEL + Pangolin(real version) + AlphaMissense(CC BY 4.0); PVS1/PS4 trees; RUNX1 BA1/BS1 |
 | **A3** Variant calibration (isotonic/Platt; ECE/Brier) | queued | vs ClinVar 2*+ |
 | **B1** Cluster curation C4->C3->C5->C8->C6->C7->C9->(C10) | in progress | C4 (RUNX1/ANKRD26/ETV6 vs ITP/MDS) first |
 | **B2** Uncertainty + selective/conformal prediction | queued | Mondrian split-conformal; abstention threshold |
-| **B3** Safety-interlock hardening (leading-call fix + per-cluster map) | in progress | fix the documented leading-call defect first |
+| **B3** Safety-interlock hardening (leading-call fix + per-cluster map) | partial | leading-call hard-stop defect FIXED + regression test (108 tests); per-cluster contraindication map pending with B1 clusters |
 | **B4** Curated published-case benchmark (per cluster) | queued | citations only (G7); Top-1/Top-3 + abstention |
 | **C1** Pre-registration (OSF) + synthetic-coupling harness | queued | protocol + falsification condition (G12) |
 | **C2** Data access (BRIDGE-BPD/ITP DAC; Glanzmann IRB) | blocked(external) | submit Month 1-2; months-long |
@@ -59,4 +59,40 @@ build (full detail + DOIs/PMIDs in `DISCERN_v3.1_Source_Verification_Report.md`)
 
 ## Per-phase log
 
-*(appended as steps execute)*
+### 2026-06-13 - B3 safety-interlock leading-call fix (done)
+Fixed the documented defect in `safety/interlock.py`: the loop skipped the leading disease for
+both flags, so a contraindicated **leading** diagnosis (e.g. "DDAVP planned + type 2B leading")
+emitted no hard stop. Now the hard-stop runs over every non-excluded disease including the
+leading call (tagged "[leading diagnosis]"); the management-divergence flag stays competitor-only.
+Regression test `test_ddavp_hard_stop_fires_when_contraindicated_disease_is_leading` added.
+**108 tests pass, CI green.** The per-cluster contraindication map (C3/C4 splenectomy,
+C8 rFXIII-A2->F13B, C7 Quebec, C1/C6 HSCT) lands with the B1 clusters.
+
+### 2026-06-13 - A1 genome-wide partition + ClinVar concordance (done; gnomAD gated)
+Ran on the VM against the full real ClinGen ERepo (`eval/erepo_genomewide.py`) and ClinVar
+`variant_summary.txt.gz` (2026-05; `eval/clinvar_concordance.py`).
+
+**H1 - partition generalizes genome-wide (Gate G9):** 12,240 ERepo variants across **170 genes**
+(38,802 applied codes). Partition vocabulary coverage **100.0000% - 0 uncovered codes**. The
+per-code partition built on the bleeding panel maps every ACMG code applied across all VCEPs;
+the uncovered-vocabulary table is empty. G9 satisfied.
+
+**H2 - routing prevents inflation at genome scale:** non-genetic owned codes appear in **51.9%**
+of all variants; a naive all-codes band would over-classify **4,068 (33.2%, Wilson 95% CI
+32.4-34.1%)**. This is **higher** than the 20.7% bleeding-panel figure - i.e. the panel was NOT
+inflation-enriched; the no-double-counting value is larger genome-wide. Reported plainly per H2.
+
+**H3 - intrinsic-only band vs ClinVar (Gate G10):** 10,883 ERepo variants carry a ClinVar
+VariationID; 10,780 matched a non-conflicting ClinVar classification. Agreement of DISCERN's
+**variant-intrinsic-only** band vs ClinVar: overall **62.4% exact / 92.8% within-one-bin**;
+>=2-star **62.5% / 92.9%**; 3-star (n=10,558) **62.9% / 93.2%**; the small independent 2-star
+stratum (n=129) **31.8% / 63.6%**. **Honest reading:** the intrinsic-only band deliberately
+OMITS the pathogenic-supporting routed codes (PP4/PS3/PP1/PM3), so it is a designed lower bound,
+not a classifier of record - exact agreement near ~62% reflects that removed evidence (the band
+drops, usually by one bin), and the 92.8% within-one-bin shows it rarely drifts further. This is
+the H3 "disagreements characterised" finding, not a DISCERN error. (Direction-stratified
+disagreement and the full-code band vs ClinVar are an A1 refinement for the next iteration.)
+
+**Data-gated:** the gnomAD per-variant frequency cross-check (A1's `gnomad_freq_check.py`) is NOT
+run - only gene-level `gnomad.v4.0.constraint_metrics.tsv` is on the VM, not per-variant AFs.
+Flagged, not silently skipped; pull per-variant gnomAD AFs (or use eRepo-embedded AFs) to close it.
