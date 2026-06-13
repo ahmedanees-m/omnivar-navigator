@@ -17,13 +17,13 @@ real eRepo; CSpec frequency criteria for GT/F8/F9/VWF/GP1BA).
 |---|---|---|
 | **Setup** Source & dataset verification | done | `DISCERN_v3.1_Source_Verification_Report.md`; all citations real; corrections folded in below |
 | **A1** Genome-wide partition + ClinVar concordance | done (gnomAD gated) | H1: 100% coverage on 12,240 variants/170 genes; H2: 33.2% inflation-prevented (CI 32.4-34.1); H3: ClinVar within-1-bin 92.8%. gnomAD per-variant cross-check data-gated (only constraint metrics on VM) |
-| **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | queued | REVEL + Pangolin(real version) + AlphaMissense(CC BY 4.0); PVS1/PS4 trees; RUNX1 BA1/BS1 |
+| **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | code-complete | `rules/variant_scoring.py`: CSpec freq codes + injectable REVEL/Pangolin/AlphaMissense + PVS1/PS4 trees + `score_variant`; H4 held-out ClinVar AUC needs real per-variant predictor scores (data-gated) |
 | **A3** Variant calibration (isotonic/Platt; ECE/Brier) | done | 7,521 P/B variants; isotonic ECE 0.008 / Brier 0.0073 (vs uncalibrated 0.201/0.060); AUC 0.999. H5 variant-half met |
 | **B1** Cluster curation C4->C3->C5->C8->C6->C7->C9->(C10) | in progress | C4 (RUNX1/ANKRD26/ETV6 vs ITP/MDS) first |
 | **B2** Uncertainty + selective/conformal prediction | queued | Mondrian split-conformal; abstention threshold |
 | **B3** Safety-interlock hardening (leading-call fix + per-cluster map) | partial | leading-call hard-stop defect FIXED + regression test (108 tests); per-cluster contraindication map pending with B1 clusters |
 | **B4** Curated published-case benchmark (per cluster) | queued | citations only (G7); Top-1/Top-3 + abstention |
-| **C1** Pre-registration (OSF) + synthetic-coupling harness | queued | protocol + falsification condition (G12) |
+| **C1** Pre-registration (OSF) + synthetic-coupling harness | done (pre-OSF) | `DISCERN_OSF_PreRegistration_v1.md` (H6 + explicit falsification, datasets, frozen analysis) + `eval/synthetic_coupling_harness.py` dry-run with circularity guard. To be time-stamped on OSF before cohort analysis (G12) |
 | **C2** Data access (BRIDGE-BPD/ITP DAC; Glanzmann IRB) | blocked(external) | submit Month 1-2; months-long |
 | **C3** Coupling validation + cohort dx + reader study | blocked(external) | gated by C2; G13 |
 | **D1** Manuscripts (methods+variant; coupling/clinical split) | queued | defensible-now paper from A/B results |
