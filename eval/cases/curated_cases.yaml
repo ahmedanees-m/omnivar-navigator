@@ -1,0 +1,66 @@
+# Curated published-case benchmark (v3.1 Track B4). REAL published cases, CITATIONS ONLY -
+# no patient identifiers (Gate G7). Each case = the presenting discriminating features (as
+# DISCERN feature ids), the cluster, the causal gene, the true diagnosis, and the source PMID.
+# Small-n by design; the diagnosis-accuracy headline needs the cohorts (Tier B/C). Features are
+# the documented presentation of the cited case type, not any individual's record.
+cases:
+  - id: lad3_infections
+    cluster: integrin
+    gene: FERMT3
+    true_dx: lad3
+    source_pmid: "30789846"
+    features: {glanzmann_type_bleeding: true, leukocytosis: true, recurrent_infections: true, aiib3_expression_absent: false}
+  - id: ptvwd_platelet_ripa
+    cluster: vwf_gpib
+    gene: GP1BA
+    true_dx: ptvwd
+    source_pmid: "22102188"
+    features: {ripa_low_dose_enhanced: true, ripa_mixing_platelet_origin: true}
+  - id: vwd2b_plasma_ripa
+    cluster: vwf_gpib
+    gene: VWF
+    true_dx: vwd2b
+    source_pmid: "25477497"
+    features: {ripa_low_dose_enhanced: true, ripa_mixing_plasma_origin: true}
+  - id: bss_as_itp
+    cluster: macrothrombocytopenia
+    gene: GP1BA
+    true_dx: bss
+    source_pmid: "33496739"
+    features: {macrothrombocytopenia: true, giant_platelets: true, flow_cd42_reduced: true}
+  - id: runx1_fpdmm_as_itp
+    cluster: thr_leukemia
+    gene: RUNX1
+    true_dx: runx1
+    source_pmid: "39808791"
+    features: {lifelong_thrombocytopenia: true, family_history_malignancy: true, ad_inheritance_pattern: true, response_to_immunosuppression: false}
+  - id: ankrd26_as_mds
+    cluster: thr_leukemia
+    gene: ANKRD26
+    true_dx: ankrd26
+    source_pmid: "28976612"
+    features: {lifelong_thrombocytopenia: true, normal_platelet_size: true, dysmegakaryopoiesis: true, family_history_malignancy: false, response_to_immunosuppression: false}
+  - id: fxiii_ich
+    cluster: coag_factor
+    gene: F13A1
+    true_dx: fxiii
+    source_pmid: "24149912"
+    features: {delayed_umbilical_separation: true, normal_pt_aptt: true, intracranial_hemorrhage: true, delayed_bleeding: true}
+  - id: vwd2n_low_fviii
+    cluster: vwd2n_hema
+    gene: VWF
+    true_dx: vwd2n
+    source_pmid: "33497541"
+    features: {low_fviii_isolated: true, reduced_vwf_fviii_binding: true, fviii_vwf_ratio_low: true, x_linked_inheritance: false}
+  - id: quebec_urokinase
+    cluster: alpha_granule
+    gene: PLAU
+    true_dx: quebec
+    source_pmid: "20007542"
+    features: {urokinase_overexpression: true}
+  - id: scott_ps_exposure
+    cluster: scott
+    gene: ANO6
+    true_dx: scott
+    source_pmid: "21107324"
+    features: {reduced_ps_exposure: true, abnormal_prothrombinase_assay: true, normal_lta: true}
