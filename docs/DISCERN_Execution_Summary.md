@@ -32,7 +32,7 @@ VUS-resolution engine for overlapping inherited bleeding & platelet disorders.
 | **P10** VUS-triage + expansion | 14–16 | ✅ | assay-priority; new clusters = YAML only (generalization claim) |
 | **P11** Manuscript/release/host/KB | 14–18 | ✅* | README→DISCERN, manuscript, release reused. *Hosting/Zenodo on release |
 
-\* = code-complete + unit-tested; starred caveat is an external dependency. **Tests: 104 passing, CI green, 16 DISCERN commits.**
+\* = code-complete + unit-tested; starred caveat is an external dependency. **Tests: 107 passing, CI green.**
 
 **Gates:** G1 (reused engine reproduces eRepo — ✅ from OmniVar) · G2 (VCEP-where-exists, else reduced-confidence) · **G3 (each ACMG code enters once — VCEP-reconstruction test)** · G4 (abstention before usefulness claims) · G5 (pre-registration) · G6 (misdx label hidden) · G7 (no patient data public) · G8 (Docker-only, env secrets).
 

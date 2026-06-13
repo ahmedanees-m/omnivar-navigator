@@ -11,7 +11,7 @@ differential diagnosis, misdiagnosis prevention, and VUS resolution in a single 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](#project-status)
-[![Tests](https://img.shields.io/badge/tests-104%20passing-brightgreen.svg)](tests)
+[![Tests](https://img.shields.io/badge/tests-107%20passing-brightgreen.svg)](tests)
 
 Built on the reused OmniVar Navigator foundation (rule engine, evidence adapters, equity
 layer, audit, and infrastructure).
@@ -108,7 +108,7 @@ Worked examples (actual engine output):
 
 ```bash
 conda env create -f environment.yml        # or: pip install -e ".[dev]"
-make test                                   # ruff and pytest (104 tests)
+make test                                   # ruff and pytest (107 tests)
 ```
 
 ```python
