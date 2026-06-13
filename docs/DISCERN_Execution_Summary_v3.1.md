@@ -22,12 +22,12 @@ real eRepo; CSpec frequency criteria for GT/F8/F9/VWF/GP1BA).
 | **B1** Cluster curation C4->C3->C5->C8->C6->C7->C9->(C10) | in progress | C4 (RUNX1/ANKRD26/ETV6 vs ITP/MDS) first |
 | **B2** Uncertainty + selective/conformal prediction | queued | Mondrian split-conformal; abstention threshold |
 | **B3** Safety-interlock hardening (leading-call fix + per-cluster map) | partial | leading-call hard-stop defect FIXED + regression test (108 tests); per-cluster contraindication map pending with B1 clusters |
-| **B4** Curated published-case benchmark (per cluster) | queued | citations only (G7); Top-1/Top-3 + abstention |
+| **B4** Curated published-case benchmark (per cluster) | done | 10 cited cases (G7 guard); Top-1 80% / Top-3 100% / abstention 40%; `eval/curated_case_benchmark.py` |
 | **C1** Pre-registration (OSF) + synthetic-coupling harness | done (pre-OSF) | `DISCERN_OSF_PreRegistration_v1.md` (H6 + explicit falsification, datasets, frozen analysis) + `eval/synthetic_coupling_harness.py` dry-run with circularity guard. To be time-stamped on OSF before cohort analysis (G12) |
 | **C2** Data access (BRIDGE-BPD/ITP DAC; Glanzmann IRB) | blocked(external) | submit Month 1-2; months-long |
 | **C3** Coupling validation + cohort dx + reader study | blocked(external) | gated by C2; G13 |
-| **D1** Manuscripts (methods+variant; coupling/clinical split) | queued | defensible-now paper from A/B results |
-| **D2** Release & reproducibility (Zenodo DOI; hosted demo) | queued | on first Release |
+| **D1** Manuscripts (methods+variant; coupling/clinical split) | done (claims map) | `DISCERN_v3.1_Claims_Map.md`: Paper 1 (defensible now) vs Paper 2 (cohort-gated); scope audited |
+| **D2** Release & reproducibility (Zenodo DOI; hosted demo) | done (checklist) | `DISCERN_Reproducibility_Checklist.md`: clean-clone repro of every public number; Zenodo on first Release |
 
 **Gates:** G1-G8 (v2) carried; **G9** partition generality, **G10** external concordance,
 **G11** calibration/coverage, **G12** pre-registration before cohort analysis, **G13** no
@@ -122,3 +122,20 @@ variants (4,904 pathogenic), test n=3,761.** AUC **0.9992** (honest: these are V
 with VUS dropped, so discrimination is easy - the deliverable is calibration). Calibration: ECE
 **0.201 (uncalibrated) -> 0.088 (Platt) -> 0.008 (isotonic)**; Brier **0.060 -> 0.024 -> 0.0073**.
 Isotonic-calibrated probabilities meet the H5 variant-half "calibrated probabilities" bar.
+
+### 2026-06-13 - A2/C1/B4/D done (code-complete bar); turn summary
+- **A2** `rules/variant_scoring.py` - novel-variant scoring: CSpec frequency codes + injectable
+  REVEL/Pangolin/AlphaMissense + PVS1 (NMD/domain) and PS4 (proband-ratio) strength trees +
+  `score_variant`. H4 held-out AUC vs InterVar is data-gated on real per-variant predictor scores.
+- **C1** OSF pre-registration protocol (`DISCERN_OSF_PreRegistration_v1.md`; H6 + explicit
+  falsification, frozen analysis, Gate G12) + `eval/synthetic_coupling_harness.py` dry-run with
+  the circularity guard (synthetic = sanity, not validation).
+- **B4** `eval/curated_case_benchmark.py` + `eval/cases/curated_cases.yaml` - 10 cited cases,
+  Top-1 80% / Top-3 100% / abstention 40%; G7 no-identifier guard; the 2 non-Top-1 are the
+  shared-feature pairs needing the deciding genetic/binding test.
+- **D1/D2** claims map (defensible-now Paper 1 vs cohort-gated Paper 2) + reproducibility checklist.
+- **State:** 128 tests green, CI green; commits 213fe2a/07fedac/7d3fb65/1438397/3723cce/7939c5e/
+  8f1acbd/b61e3b8/11207b6 + this doc/README batch. **Everything doable on public data + code is
+  done; the only open items are externally gated:** Track C2/C3 (DAC/IRB cohorts -> the coupling,
+  G13), the gnomAD per-variant cross-check (per-variant AFs not on the VM), H4 (real predictors),
+  hosting/Zenodo (on release). Those cannot be completed without external access, by design.

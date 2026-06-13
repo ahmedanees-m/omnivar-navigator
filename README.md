@@ -11,7 +11,7 @@ differential diagnosis, misdiagnosis prevention, and VUS resolution in a single 
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-active%20development-orange.svg)](#project-status)
-[![Tests](https://img.shields.io/badge/tests-107%20passing-brightgreen.svg)](tests)
+[![Tests](https://img.shields.io/badge/tests-128%20passing-brightgreen.svg)](tests)
 
 Built on the reused OmniVar Navigator foundation (rule engine, evidence adapters, equity
 layer, audit, and infrastructure).
@@ -70,19 +70,23 @@ Each evidence stream enters the model exactly once. The cluster is small, so the
 computed by exact enumeration over disease and variant states. When the data are sparse,
 the engine abstains and returns the deciding observation instead.
 
-## The six discrimination clusters
+## The discrimination clusters (the cited C1-C10 catalog)
 
 | Cluster | Look-alike diseases | Deciding observation | Misdiagnosis harm |
 |---|---|---|---|
-| Integrin | Glanzmann, LAD-III, RASGRP2, LAD-I | leukocytosis, integrin activation | LAD-III and LAD-I need HSCT |
-| VWF and GPIb | 2B VWD, platelet-type VWD, 2A VWD | RIPA mixing (plasma vs platelet) | DDAVP harms 2B; opposite treatment |
-| Macrothrombocytopenia | Bernard-Soulier, MYH9, vs ITP | blood smear, CD42 flow | avoids steroids and splenectomy |
-| Granule | HPS, Chediak-Higashi, Gray platelet | EM, smear, HLH workup | Chediak risks HLH (HSCT) |
-| Thrombocytopenia with leukaemia risk | RUNX1, ETV6, ANKRD26 | germline panel, pedigree | surveillance and donor selection |
-| Coagulation factor | F8, F9, F11, F13, fibrinogen | factor assays | Factor XIII miss risks brain bleed |
+| Integrin (C1) | Glanzmann, LAD-III, RASGRP2, LAD-I | leukocytosis, integrin activation | LAD-III and LAD-I need HSCT |
+| VWF and GPIb (C2) | 2B VWD, platelet-type VWD, 2A VWD | RIPA mixing (plasma vs platelet) | DDAVP harms 2B; opposite treatment |
+| Thrombocytopenia + leukaemia risk vs ITP (C4) | RUNX1, ETV6, ANKRD26 vs ITP | germline panel, pedigree, platelet size | missed leukaemia surveillance; avoid splenectomy/immunosuppression; affected relative not a donor |
+| Macrothrombocytopenia vs ITP (C3) | Bernard-Soulier, MYH9 vs ITP | blood smear, CD42 flow | avoids steroids and splenectomy |
+| 2N VWD vs mild hemophilia A (C5) | VWD 2N, mild/moderate hemophilia A | VWF:FVIII-binding assay | inheritance counselling; VWF-containing vs FVIII |
+| Coagulation factor incl. FXIII (C8) | F8, F9, F11, F13A1/F13B, fibrinogen | factor assays, FXIII activity | recombinant FXIII-A2 works for F13A1 not F13B; FXIII miss risks brain bleed |
+| Granule / storage pool (C6) | HPS, Chediak-Higashi, delta-SPD | EM, smear, HLH workup | Chediak risks HLH (HSCT) |
+| Alpha-granule (C7) | Gray platelet (NBEAL2), GFI1B, ARC, Quebec | smear, EM, urokinase assay | GPS myelofibrosis surveillance; Quebec needs antifibrinolytics not platelets |
+| Mild bleeding / low VWF (C9) | type-1 / low VWF, mild platelet defect, normal | repeat VWF, LTA, BAT score | over-/under-diagnosis (calibration/abstention demo) |
+| Scott syndrome (C10) | Scott (ANO6) vs normal workup | PS-exposure / prothrombinase assay | easily missed (routine tests normal) |
 
-Every likelihood ratio is linked to a source PMID and a sample size, so the knowledge base
-is versioned and citable.
+Every likelihood ratio is linked to a source PMID and a sample size (a CI guard enforces this),
+so the knowledge base is versioned and citable.
 
 ## Inputs and outputs
 
@@ -167,6 +171,17 @@ Real-data results (Tier A, open data; see `docs/DISCERN_Validation_Results.md`):
   inherited bleeding disorders, yielding 4 in-cluster cases (LAD-III, Chediak-Higashi);
   DISCERN is correct on all 4 (Top-1). The diagnosis-accuracy headline needs curated cases
   and the cohorts below.
+* Genome-wide partition generalization (v3.1): across the full ClinGen Evidence Repository
+  (12,240 variants, 170 genes), the per-code partition covers 100 percent of applied codes
+  (0 unknown), and a naive all-codes score would over-classify 33.2 percent of variants
+  (95 percent CI 32.4 to 34.1) - higher than the bleeding-panel figure, so the no-double-count
+  value grows genome-wide. ClinVar concordance of the intrinsic-only band: 62.4 percent exact,
+  92.8 percent within-one-bin (intrinsic-only is a designed lower bound, omitting routed codes).
+* Variant calibration (v3.1): isotonic calibration against ClinVar labels (7,521 variants)
+  gives expected calibration error 0.008 and Brier 0.0073 (from 0.201 and 0.060 uncalibrated).
+* Curated published-case diagnosis (v3.1, small n): Top-1 80 percent, Top-3 100 percent on 10
+  cited cases across clusters; the two non-Top-1 cases are the shared-feature pairs that need
+  the deciding genetic/binding test. Cohort-scale accuracy is gated below.
 * Gate G1: the reused rule engine reproduces ClinGen eRepo at 94.9 percent exact and 99.9
   percent within-one-bin concordance on 12,499 records.
 
@@ -189,10 +204,14 @@ strength were extracted and verified for the ITGA2B/ITGB3, F8, F9, VWF, and GP1B
 from the ClinGen CSpec registry and the panels' own Evidence Repository records (see
 docs/DISCERN_VCEP_Spec_Verification_Report.md); the remaining in-specification item is the
 variant-dependent PVS1 and PS4 strength decision trees, kept at ACMG baseline as a
-documented simplification. Remaining external work: the pre-registered reader study, the
-South Indian Glanzmann cohort run, and the web interface. See
-[docs/DISCERN_Execution_Summary.md](docs/DISCERN_Execution_Summary.md) for the full
-per-phase log.
+documented simplification. The v3.1 expansion adds genome-wide partition validation, ClinVar
+concordance, variant calibration, novel-variant scoring, the full C1-C10 cluster catalog with a
+per-cluster safety map, Mondrian conformal selective prediction, and a pre-registered coupling
+protocol. The novel coupling itself remains cohort-gated and is never claimed before paired-data
+results (Gate G13). Remaining external work: the DAC/IRB cohorts, the reader study, the
+gnomAD per-variant cross-check, and the web interface. See
+[docs/DISCERN_Execution_Summary_v3.1.md](docs/DISCERN_Execution_Summary_v3.1.md) and
+[docs/DISCERN_v3.1_Claims_Map.md](docs/DISCERN_v3.1_Claims_Map.md) for the full status.
 
 ## License and citation
 
