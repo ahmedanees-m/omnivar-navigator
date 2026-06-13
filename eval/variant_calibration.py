@@ -67,7 +67,7 @@ def _platt_fit(xs, ys, iters=2000, lr=0.02):
     n = len(zs)
     for _ in range(iters):
         ga = gb = 0.0
-        for z, y in zip(zs, ys):
+        for z, y in zip(zs, ys, strict=False):
             e = _sigmoid(a * z + b) - y
             ga += e * z
             gb += e
@@ -85,7 +85,6 @@ def _isotonic_fit(xs, ys):
     val = sy[:]
     wt = [1.0] * len(sy)
     bx = sx[:]
-    i = 0
     blocks = [[val[k], wt[k], bx[k]] for k in range(len(sy))]
     merged = True
     while merged:
@@ -115,7 +114,7 @@ def _isotonic_fit(xs, ys):
 
 
 def _brier(probs, ys):
-    return sum((p - y) ** 2 for p, y in zip(probs, ys)) / len(ys)
+    return sum((p - y) ** 2 for p, y in zip(probs, ys, strict=False)) / len(ys)
 
 
 def _ece(probs, ys, bins=10):
@@ -133,8 +132,8 @@ def _ece(probs, ys, bins=10):
 
 
 def _auc(probs, ys):
-    pos = [p for p, y in zip(probs, ys) if y == 1]
-    neg = [p for p, y in zip(probs, ys) if y == 0]
+    pos = [p for p, y in zip(probs, ys, strict=False) if y == 1]
+    neg = [p for p, y in zip(probs, ys, strict=False) if y == 0]
     if not pos or not neg:
         return None
     wins = sum((p > q) + 0.5 * (p == q) for p in pos for q in neg)
@@ -182,7 +181,9 @@ def run(erepo_path, clinvar_path, seed=0):
     cx, cy = [d[0] for d in cal], [d[1] for d in cal]
     tx, ty = [d[0] for d in test], [d[1] for d in test]
 
-    base = lambda x: _sigmoid(x / 4.0)        # naive Tavtigian-points sigmoid
+    def base(x):
+        return _sigmoid(x / 4.0)              # naive Tavtigian-points sigmoid baseline
+
     platt = _platt_fit(cx, cy)
     iso = _isotonic_fit(cx, cy)
     out = {"n_labeled": len(data), "n_pathogenic": sum(d[1] for d in data),

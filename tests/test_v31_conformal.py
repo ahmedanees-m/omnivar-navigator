@@ -8,8 +8,7 @@ import random
 
 from core.dx_schemas import Feature, FeatureKind
 from diseases.ontology import cluster_for
-from jointdx.conformal import (calibrate, empirical_coverage, prediction_set,
-                               selective_predict)
+from jointdx.conformal import calibrate, empirical_coverage, prediction_set, selective_predict
 from jointdx.factorgraph import Evidence
 
 
