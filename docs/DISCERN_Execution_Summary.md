@@ -65,7 +65,7 @@ VUS-resolution engine for overlapping inherited bleeding & platelet disorders.
   `phenotype_lr.py` (LIRICAL LRs + pertinent negatives), `lab.py` (functional touches D+V once).
 - **P2** — `diseases/ontology.py` + 6 clusters; every LR carries (freq, n_cases, PMID).
 - **P3** — `jointdx/factorgraph.py` + `infer.py`: P(D,V|E), PP4 as the disease→variant
-  coupling; **GT vs LAD-III discrimination + Gate-G3 no-inflation verified**. Commit `9760971`.
+  coupling; **GT vs LAD-III discrimination + Gate-G3 no-double-counting verified (unit test + real-data routing)**. Commit `9760971`.
 - **P4** — `jointdx/uncertainty.py` (Beta-resampled credible intervals) + `abstain.py`.
 - **P5** — `safety/interlock.py`: LAD-III/HSCT flag, DDAVP+2B hard stop, splenectomy/BSS.
 - **P6** — `nextobs/{recommend,partial,whatif}.py`: EIG over the joint; RIPA what-if. Commit `c9321c3`.
@@ -91,12 +91,16 @@ DOI on release; managed-access cohorts (Solve-RD/UDN, off critical path).
 Verified all benchmarking sources (DISCERN_Validation_Verification_Report.md) and executed
 the open Tier-A validation on real downloaded data (full results: DISCERN_Validation_Results.md).
 
-- **Tier A1 - VCEP reconstruction on real ClinGen ERepo (headline):** 2,653 real
-  VCEP-classified bleeding-gene variants -> **93.0% exact / 100% within-one-bin**
-  reconstruction, **100% no-inflation** (per-code partition re-sum == direct, every
-  variant). Extracted the **real per-code applied strengths** (PM2/BP4/PP4/PP3/PVS1/...),
-  retiring the placeholder gap; quantified routing (1,443 PP4 points to the coupling, not
-  double-counted). Gate G3 is now a real calibration result. `eval/erepo_reconstruction.py`.
+- **Tier A1 - ACMG combining fidelity + per-code partition on real ClinGen ERepo (headline):**
+  2,653 real VCEP-classified bleeding-gene variants. ACMG combining fidelity (point engine
+  reproduces the VCEP label from the experts' own codes): **93.0% exact / 100% within-one-bin**
+  (arithmetic only, not coupling). Per-code partition: **100% coverage (0 unknown)**; owned
+  non-genetic codes appear in **31.7%** of variants, routing **1,443** PP4 points to the
+  coupling (393 functional, 794 seg/phasing) out of the genetic stream; a naive bottom-line
+  score would over-classify **549 (20.7%)**. The earlier "100% no-inflation" metric was a
+  tautology and was replaced. The observed applied-strength distribution is real; the
+  per-gene CSpec rule-strength tables in `rules/vcep/specs` remain documented defaults (the
+  outstanding placeholder item). `eval/erepo_reconstruction.py` + `tests/test_erepo_eval.py`.
 - **Tier A3 - Phenopacket Store diagnosis:** cloned 11,155 phenopackets; the corpus is thin
   on bleeding disorders - **4 in-cluster cases** (LAD-III, Chediak-Higashi), **DISCERN 4/4
   Top-1**. Honest: the diagnosis headline needs curated cases + cohorts (Tier B/C).

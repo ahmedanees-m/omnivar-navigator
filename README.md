@@ -151,12 +151,18 @@ deploy/ docker/ data/ figures/ tests/   deployment, container images, data scrip
 
 Real-data results (Tier A, open data; see `docs/DISCERN_Validation_Results.md`):
 
-* VCEP reconstruction on the real ClinGen Evidence Repository: on 2,653 real
-  VCEP-classified bleeding-gene variants, DISCERN reproduces the expert classification
-  from the applied per-code evidence at 93.0 percent exact and 100 percent within-one-bin,
-  with a 100 percent no-inflation rate (the per-code partition re-sum equals the direct
-  total on every variant). This makes Gate G3 a real calibration result, and the real
-  per-code strengths extracted here replace the earlier placeholders.
+* ACMG combining-rule fidelity on the real ClinGen Evidence Repository: on 2,653 real
+  VCEP-classified bleeding-gene variants, the Tavtigian point engine reproduces the VCEP's
+  bottom-line label from the experts' own applied codes at 93.0 percent exact and 100
+  percent within-one-bin. This validates the point values and banding, not code assignment
+  (the codes are given) and not the disease-variant coupling (no phenotype is present here).
+* Per-code partition on the same variants (the no-double-counting evidence): every applied
+  code is routed to exactly one factor (0 unknown); codes owned by non-genetic factors
+  (PP4/PS3/PP1/PM3 and so on) appear in 31.7 percent of variants and are routed out of the
+  genetic stream (1,443 PP4 points to the coupling, 393 functional, 794 segregation/phasing).
+  A tool consuming the bottom-line label would double-count these; on real variants this
+  would over-classify 549 of 2,653. The coupling itself is unit-tested; its empirical
+  validation awaits the paired-phenotype cohorts.
 * Diagnosis benchmark on the open GA4GH Phenopacket Store: the general corpus is thin on
   inherited bleeding disorders, yielding 4 in-cluster cases (LAD-III, Chediak-Higashi);
   DISCERN is correct on all 4 (Top-1). The diagnosis-accuracy headline needs curated cases
