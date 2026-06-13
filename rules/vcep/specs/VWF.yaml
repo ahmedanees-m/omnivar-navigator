@@ -16,7 +16,7 @@ genes: [VWF]
 disease: von Willebrand disease (2A/2B/2M)
 inheritance: AD
 mechanism: vwf
-source: "ClinGen VWD VCEP (CSpec GN081); covers 2A/2B/2M; thresholds from CSpec + ERepo"
+source: "ClinGen VWD VCEP VWF v1.0.0 (CSpec GN081); covers 2A/2B/2M; thresholds from CSpec + ERepo"
 covered: true
 prior_p: 0.10
 af:

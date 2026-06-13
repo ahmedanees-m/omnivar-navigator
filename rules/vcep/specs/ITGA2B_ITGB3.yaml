@@ -22,7 +22,7 @@ covered: true
 prior_p: 0.10
 af:
   ba1: 0.0024       # ERepo-verified: "GT-specific BA1 threshold of >0.0024"
-  bs1: 0.00158      # ERepo-verified: >0.00158 (current applied value)
+  bs1: 0.00158      # ERepo-verified current value; the 2021 paper text used 0.0014, superseded by Platelet Specs v2
   pm2: 0.0001       # ERepo-verified: PM2_Supporting applied below 0.0001
 code_strengths:
   PM2: PP           # VERIFIED Supporting (509/509 PM2 records in ERepo; recessive GT spec)
