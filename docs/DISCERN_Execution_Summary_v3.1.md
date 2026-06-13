@@ -16,8 +16,8 @@ real eRepo; CSpec frequency criteria for GT/F8/F9/VWF/GP1BA).
 | Track / Phase | Status | Notes |
 |---|---|---|
 | **Setup** Source & dataset verification | done | `DISCERN_v3.1_Source_Verification_Report.md`; all citations real; corrections folded in below |
-| **A1** Genome-wide partition + ClinVar concordance | done (gnomAD gated) | H1: 100% coverage on 12,240 variants/170 genes; H2: 33.2% inflation-prevented (CI 32.4-34.1); H3: ClinVar within-1-bin 92.8%. gnomAD per-variant cross-check data-gated (only constraint metrics on VM) |
-| **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | code-complete | `rules/variant_scoring.py`: CSpec freq codes + injectable REVEL/Pangolin/AlphaMissense + PVS1/PS4 trees + `score_variant`; H4 held-out ClinVar AUC needs real per-variant predictor scores (data-gated) |
+| **A1** Genome-wide partition + ClinVar + gnomAD cross-check | done | H1: 100% coverage on 12,240 variants/170 genes; H2: 33.2% inflation-prevented (CI 32.4-34.1); H3: ClinVar within-1-bin 92.8%; gnomAD freq cross-check: **97.8%** concordance on 629 variants (curator-cited gnomAD AFs) |
+| **A2** Complete variant-intrinsic scoring (predictors, strength trees, novel-variant) | done (H4 partial) | `rules/variant_scoring.py` (CSpec freq + injectable predictors + PVS1/PS4 trees). H4 in-text run: AUC gene-specific 0.900, generic-ACMG/InterVar-paradigm 0.903, REVEL-alone 0.961 - thin freq+REVEL features favour REVEL; full H4 needs all predictors per-variant + literal InterVar (ANNOVAR) |
 | **A3** Variant calibration (isotonic/Platt; ECE/Brier) | done | 7,521 P/B variants; isotonic ECE 0.008 / Brier 0.0073 (vs uncalibrated 0.201/0.060); AUC 0.999. H5 variant-half met |
 | **B1** Cluster curation C4->C3->C5->C8->C6->C7->C9->(C10) | in progress | C4 (RUNX1/ANKRD26/ETV6 vs ITP/MDS) first |
 | **B2** Uncertainty + selective/conformal prediction | queued | Mondrian split-conformal; abstention threshold |
@@ -134,6 +134,23 @@ Isotonic-calibrated probabilities meet the H5 variant-half "calibrated probabili
   Top-1 80% / Top-3 100% / abstention 40%; G7 no-identifier guard; the 2 non-Top-1 are the
   shared-feature pairs needing the deciding genetic/binding test.
 - **D1/D2** claims map (defensible-now Paper 1 vs cohort-gated Paper 2) + reproducibility checklist.
+
+### 2026-06-13 - A1 gnomAD cross-check + H4 benchmark (the two previously data-gated items)
+- **gnomAD per-variant frequency cross-check (A1 last sub-part) - DONE.** `eval/gnomad_freq_check.py`
+  on the VM: using the per-variant gnomAD AFs the VCEP curators cite verbatim in the eRepo
+  narratives (no multi-TB gnomAD download), DISCERN's gene-specific thresholds reproduce the
+  VCEP's applied frequency code on **629 variants at 97.8% concordance** (PM2 573/574, BA1 38/48;
+  the ~2% residual is the BA1<->BS1 boundary from subpopulation-vs-FAF nuance). Real per-variant
+  gnomAD frequencies; A1 is now fully closed.
+- **H4 novel-variant AUC vs InterVar - PARTIAL (honest negative).** `eval/h4_benchmark.py` on 483
+  spec-gene ClinVar P/B variants (REVEL in 211): AUC DISCERN gene-specific **0.900**,
+  generic-ACMG (the InterVar paradigm) **0.903**, REVEL alone **0.961**. Honest reading: with only
+  freq+REVEL parseable in-text (no PVS1/PS4/AlphaMissense/splice fired), the thin code-sum
+  underperforms the continuous REVEL ensemble, and gene-specific ~= generic-ACMG on P/B-extreme
+  RANKING (their real divergence is calibration + borderline frequencies, cf. A3 ECE 0.008). The
+  FULL H4 needs per-variant REVEL/Pangolin/AlphaMissense pulled to the VM AND the literal InterVar
+  tool (ANNOVAR + humandb, academic-registration-gated) - that heavier data-engineering remains the
+  open item; this run is the transparent in-text-feature version.
 - **State:** 128 tests green, CI green; commits 213fe2a/07fedac/7d3fb65/1438397/3723cce/7939c5e/
   8f1acbd/b61e3b8/11207b6 + this doc/README batch. **Everything doable on public data + code is
   done; the only open items are externally gated:** Track C2/C3 (DAC/IRB cohorts -> the coupling,
