@@ -22,7 +22,7 @@ def _register(factor: str, codes: list[str]) -> None:
 # same-residue) — enters P(E_geno | V) in the genetic factor (Phase 1.1).
 _register("variant_intrinsic",
           ["PM2", "BS1", "BA1", "PP3", "BP4", "PVS1", "PM5", "PS1", "PM4", "BP3", "BP7",
-           "PM1", "PS4", "PP2", "BP1", "PP5", "BP6"])
+           "PM1", "PS4", "PP2", "BP1", "PP5", "BP6", "BS2", "BP5"])
 # PP4 -> the disease->variant coupling P(V|D) (Phase 3); never added in the genetic factor.
 _register("disease_pp4", ["PP4"])
 # functional -> P(E_func | D, V) (Phase 3); touches both disease and variant, counted once.
