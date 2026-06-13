@@ -45,26 +45,29 @@ def flags(cluster: DiscriminationCluster, joint: dict, planned_tx: str | None = 
     if d_star is None:
         return out
     for d in cluster.diseases:
-        if d.id == lead_id:
-            continue
         p = md.get(d.id, 0.0)
-        sev = severity(d_star, d)
-        # management-aware flag: treatment-changing competitor above the danger threshold
-        if treatment_changes(d_star, d) and p * sev >= tau:
-            out.append(SafetyFlag(
-                leading_id=lead_id, competitor_id=d.id,
-                management_divergence=f"{d_star.treatment} vs {d.treatment}",
-                p_competitor=round(p, 4), severity="high" if sev >= 0.9 else "moderate",
-                resolving_observation=_resolving_obs(cluster),
-                message=(f"If {d.name} (p={p:.2f}) rather than {d_star.name}, management changes "
-                         f"({d_star.treatment} -> {d.treatment}). Resolve before treating.")))
-        # hard-stop interlock: planned treatment contraindicated by a non-excluded competitor
+        # management-aware divergence flag: competitor-only (the leading call is the baseline).
+        if d.id != lead_id:
+            sev = severity(d_star, d)
+            if treatment_changes(d_star, d) and p * sev >= tau:
+                out.append(SafetyFlag(
+                    leading_id=lead_id, competitor_id=d.id,
+                    management_divergence=f"{d_star.treatment} vs {d.treatment}",
+                    p_competitor=round(p, 4), severity="high" if sev >= 0.9 else "moderate",
+                    resolving_observation=_resolving_obs(cluster),
+                    message=(f"If {d.name} (p={p:.2f}) rather than {d_star.name}, management changes "
+                             f"({d_star.treatment} -> {d.treatment}). Resolve before treating.")))
+        # hard-stop interlock (v3.1 B3 fix): a planned treatment contraindicated by ANY
+        # non-excluded disease fires — INCLUDING the leading call. Previously the loop skipped
+        # the leading disease, so "DDAVP planned + 2B leading" emitted no hard stop.
         if planned_tx and planned_tx in d.contraindications and p > 0:
+            is_lead = d.id == lead_id
             out.append(SafetyFlag(
                 leading_id=lead_id, competitor_id=d.id,
                 management_divergence=f"{planned_tx} contraindicated if {d.name}",
                 p_competitor=round(p, 4), severity="high",
                 resolving_observation=_resolving_obs(cluster),
-                message=(f"HARD STOP: {planned_tx} is contraindicated if {d.name} "
-                         f"(p={p:.2f}) — resolve with the deciding observation first.")))
+                message=(f"HARD STOP: {planned_tx} is contraindicated if {d.name} (p={p:.2f})"
+                         + (" [leading diagnosis]" if is_lead else "")
+                         + " — resolve with the deciding observation first.")))
     return out

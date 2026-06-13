@@ -49,6 +49,25 @@ def test_ddavp_interlock_hard_stop():
     assert any("HARD STOP" in f.message and f.competitor_id == "vwd2b" for f in fl)
 
 
+def test_ddavp_hard_stop_fires_when_contraindicated_disease_is_leading():
+    """v3.1 B3 regression: the hard-stop must fire even when the contraindicated disease is the
+    LEADING call. Previously the loop `continue`d past the leading disease, so "DDAVP planned +
+    2B leading" emitted only a divergence flag (or nothing) instead of a hard stop."""
+    from jointdx.infer import leading_disease
+    cluster = cluster_for("vwf_gpib")
+    # plasma-origin RIPA + a VWF variant -> type 2B leads; DDAVP is contraindicated in 2B.
+    ev = Evidence(variant_gene="VWF",
+                  clinical=[Feature("ripa_low_dose_enhanced", FeatureKind.LAB, True, observed=True),
+                            Feature("ripa_mixing_plasma_origin", FeatureKind.LAB, True, observed=True)])
+    j = joint(cluster, ev)
+    lead_id, _ = leading_disease(j)
+    assert lead_id == "vwd2b"                                   # 2B is the leading call
+    fl = flags(cluster, j, planned_tx="ddavp")
+    hard = [f for f in fl if "HARD STOP" in f.message and f.competitor_id == "vwd2b"]
+    assert hard, "hard-stop must fire on the contraindicated LEADING diagnosis"
+    assert "[leading diagnosis]" in hard[0].message
+
+
 # ---- Phase 6: next observation + what-if + partial ----
 def test_next_observation_prefers_management_changing():
     cluster = cluster_for("integrin")
